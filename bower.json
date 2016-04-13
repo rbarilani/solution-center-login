@@ -1,0 +1,38 @@
+{
+  "name": "solution-center-login",
+  "authors": [
+    "Damián García <damian.garcia@zalando.de>",
+    "Colin Howald <colin.howald@zalando.de>"
+  ],
+  "description": "gi",
+  "main": "dist/solution-center-login.js",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zalando/solution-center-login"
+  },
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    ".bowerrc",
+    ".gitignore",
+    ".jshintignore",
+    ".jshintrc",
+    ".npmignore",
+    "karma.conf.js",
+    "bower.json",
+    "gulpfile.js",
+    "package.json"
+  ],
+  "dependencies": {
+    "angular": "~1.5.0",
+    "angular-cookies": "~1.5.0"
+  },
+  "devDependencies": {
+    "angular-mocks": "~1.5.0"
+  }
+}

@@ -1,0 +1,12 @@
+#### Covers build environment for web application
+node_modules/
+bower_components/
+dist/
+npm-debug.log
+
+#### Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
+
+*.iml
+
+## Directory-based project format:
+.idea/
