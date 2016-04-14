@@ -1,4 +1,4 @@
-angular.module('sc-authentication', [])
+angular.module('sc-authentication')
   .factory('environments', [
     function () {
       var environments = {
@@ -44,6 +44,6 @@ angular.module('sc-authentication', [])
         getLoginUrl: getLoginUrl,
         getLogoutUrl: getLogourUrl,
         getTokensAPI: getTokensAPI
-      }
+      };
     }
   ]);

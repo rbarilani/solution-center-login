@@ -1,28 +1,15 @@
-angular.module('sc-authentication', ['angular-jwt'])
+angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
   .factory('solutionCenterAuth', [
     '$q',
     '$localStorage',
     '$cookies',
-    'solutionCenterEnvironments',
+    'environments',
     '$location',
     '$http',
     'jwtHelper',
     function ($q, $localStorage, $cookies, environments, $location, $http, jwtHelper) {
 
       'use strict';
-
-      var service = {
-        authenticate: authenticate,
-        redirectToLogin: redirectToLogin,
-        getToken: getToken,
-        logout: logout,
-        parseToken: parseToken,
-        getUser: getUser
-      };
-
-      return service;
-
-      //////////////////////
 
       var TOKEN_COOKIE_KEY = "SC_TOKEN";
 
@@ -85,9 +72,6 @@ angular.module('sc-authentication', ['angular-jwt'])
           });
       }
 
-      /*
-       XXX Returns either null or a valid token
-       */
       function validateToken(token) {
         if (token === null) {
           return $q.reject("null token");
@@ -99,5 +83,13 @@ angular.module('sc-authentication', ['angular-jwt'])
       function getUserFromToken(token) {
         return jwtHelper.decodeToken(token);
       }
+
+      return {
+        authenticate: authenticate,
+        redirectToLogin: redirectToLogin,
+        getToken: getToken,
+        logout: logout,
+        getUser: getUser
+      };
     }
   ]);

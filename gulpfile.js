@@ -1,5 +1,4 @@
 var fs = require('fs');
-var connect = require('gulp-connect');
 var gulp = require('gulp');
 var karma = require('karma').server;
 var concat = require('gulp-concat');
@@ -10,7 +9,6 @@ var es = require('event-stream');
 var del = require('del');
 var uglify = require('gulp-uglify');
 var plumber = require('gulp-plumber');
-var open = require('gulp-open');
 var order = require("gulp-order");
 var flatten = require("gulp-flatten");
 
@@ -23,13 +21,6 @@ var config = {
     ' * License: <%= pkg.license %>\n' +
     ' */\n\n\n'
 };
-
-gulp.task('connect', function() {
-    connect.server({
-        root: '.',
-        livereload: true
-    });
-});
 
 gulp.task('watch', function () {
     gulp.watch(['./src/**/*.js'], ['build']);
@@ -51,7 +42,7 @@ gulp.task('scripts', function() {
             .pipe(jshint.reporter('fail'));
     };
 
-    es.merge(buildDistJS(), buildTemplates())
+    es.merge(buildDistJS())
         .pipe(plumber({
             errorHandler: handleError
         }))
@@ -67,7 +58,6 @@ gulp.task('scripts', function() {
         .pipe(rename({suffix: '.min'}))
         .pipe(uglify({preserveComments: 'some'}))
         .pipe(gulp.dest('./dist'))
-        .pipe(connect.reload());
 });
 
 gulp.task('jshint-test', function(){
@@ -81,20 +71,11 @@ gulp.task('karma', ['build'], function (done) {
     }, done);
 });
 
-gulp.task('karma-serve', ['build'], function(done){
-    karma.start({
-        configFile: __dirname + '/karma.conf.js',
-        singleRun: false
-    }, done);
-});
-
 function handleError(err) {
     console.log(err.toString());
     this.emit('end');
-};
+}
 
 gulp.task('build', ['scripts']);
-gulp.task('serve', ['build', 'connect', 'watch', 'open']);
-gulp.task('default', ['build', 'test']);
 gulp.task('test', ['build', 'jshint-test', 'karma']);
-gulp.task('serve-test', ['build', 'watch', 'jshint-test', 'karma-serve']);
+gulp.task('default', ['build', 'test']);
