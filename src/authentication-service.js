@@ -40,14 +40,14 @@ angular.module('sc-authentication', ['angular-jwt'])
       }
 
       function redirectToLogin(environment, redirectUrl) {
-        $location.url = environments.getLoginUrl(environment) + "?redirect=" + redirectUrl;
+        $location.url(environments.getLoginUrl(environment) + "?redirect=" + redirectUrl);
       }
 
       function logout(environment) {
         $localStorage.sc_token = null;
         $localStorage.sc_user = null;
 
-        $location.url = environments.getLogoutUrl(environment); // XXX Cookies is reset in our app
+        $location.url(environments.getLogoutUrl(environment));
       }
 
       function getToken() {
