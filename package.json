@@ -2,7 +2,8 @@
   "author": "Damián García <damian.garcia@zalando.de>",
   "description": "Login service to handle authentication in the Zalando Solution Center",
   "dependencies": {
-    "angular": "~1.5.0"
+    "angular": "~1.5.0",
+    "jwt-decode": "^2.0.1"
   },
   "devDependencies": {
     "del": "^0.1.3",
