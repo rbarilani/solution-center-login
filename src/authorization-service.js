@@ -22,14 +22,14 @@ angular.module('sc-authentication')
 
       this.$get = ['$q', 'authenticationService',
         function ($q, authenticationService) {
-          'use strict';
 
           var service = {
             // Require that there is an authenticated user
             // (use this in a route resolve to prevent non-authenticated users from entering that route)
             requireAuthenticatedUser: function () {
-              if (authenticationService.getUser()) {
-                return $q.when();
+              var user = authenticationService.getUser();
+              if (user) {
+                return $q.when(user);
               }
               else {
                 authenticationService.authenticate();
