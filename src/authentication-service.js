@@ -29,7 +29,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         }
 
         function redirectToLogin(environment, redirectUrl) {
-          $window.location.href = environments.getLoginUrl(environment) + "?redirect=" + redirectUrl;
+          $window.location.href = environments.getLoginUrl(environment) + "?redirect=" + encodeURIComponent(redirectUrl);
         }
 
         function logout(environment) {
