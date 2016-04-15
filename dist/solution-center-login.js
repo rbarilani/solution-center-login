@@ -87,7 +87,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
             return $q.reject("null token");
           }
 
-          return $injector.get('$http').get(environments.getTokensAPI(), token);
+          return $injector.get('$http').get(environments.getTokensAPI(environment), token);
         }
 
         function getUserFromToken(token) {
