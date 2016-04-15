@@ -2,7 +2,7 @@ angular.module('sc-authentication')
     .provider('authorizationService', [function () {
       'use strict';
 
-      var environment = null;
+      var environment = 'STAGE';
 
       this.setEnvironment = function (env) {
         environment = env;
@@ -20,8 +20,8 @@ angular.module('sc-authentication')
 
       */
 
-      this.$get = ['$q', 'authenticationService',
-        function ($q, authenticationService) {
+      this.$get = ['$q', 'authenticationService', '$location',
+        function ($q, authenticationService, $location) {
 
           var service = {
             // Require that there is an authenticated user
@@ -32,7 +32,7 @@ angular.module('sc-authentication')
                 return $q.when(user);
               }
               else {
-                authenticationService.authenticate();
+                authenticationService.authenticate(environment, $location.url());
                 return $q.reject();
               }
             } /*,
