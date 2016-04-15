@@ -36,7 +36,8 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         }
 
         function redirectToLogin(environment, redirectUrl) {
-          $window.location.href = environments.getLoginUrl(environment) + "?redirect=" + encodeURIComponent(redirectUrl);
+          //$window.location.href = environments.getLoginUrl(environment) + "?redirect=" + encodeURIComponent(redirectUrl);
+          $window.location.href = "https://www.solutions.zalando.com";
         }
 
         function logout(environment) {
