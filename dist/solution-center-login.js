@@ -11,10 +11,10 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
       '$localStorage',
       '$cookies',
       'environments',
-      '$location',
+      '$window',
       '$injector',
       'jwtHelper',
-      function ($q, $localStorage, $cookies, environments, $location, $injector, jwtHelper) {
+      function ($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper) {
 
         'use strict';
 
@@ -36,14 +36,14 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         }
 
         function redirectToLogin(environment, redirectUrl) {
-          $location.url(environments.getLoginUrl(environment) + "?redirect=" + redirectUrl);
+          $window.location.href = environments.getLoginUrl(environment) + "?redirect=" + redirectUrl;
         }
 
         function logout(environment) {
           $localStorage.sc_token = null;
           $localStorage.sc_user = null;
 
-          $location.url(environments.getLogoutUrl(environment));
+          $window.location.href = environments.getLogoutUrl(environment);
         }
 
         function getToken() {
@@ -126,8 +126,8 @@ angular.module('sc-authentication')
 
       */
 
-      this.$get = ['$q', 'authenticationService', '$location',
-        function ($q, authenticationService, $location) {
+      this.$get = ['$q', 'authenticationService', '$window',
+        function ($q, authenticationService, $window) {
 
           var service = {
             // Require that there is an authenticated user
@@ -138,7 +138,7 @@ angular.module('sc-authentication')
                 return $q.when(user);
               }
               else {
-                authenticationService.authenticate(environment, $location.url());
+                authenticationService.authenticate(environment, $window.location.href);
                 return $q.reject();
               }
             } /*,

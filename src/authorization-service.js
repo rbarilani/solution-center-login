@@ -20,8 +20,8 @@ angular.module('sc-authentication')
 
       */
 
-      this.$get = ['$q', 'authenticationService', '$location',
-        function ($q, authenticationService, $location) {
+      this.$get = ['$q', 'authenticationService', '$window',
+        function ($q, authenticationService, $window) {
 
           var service = {
             // Require that there is an authenticated user
@@ -32,7 +32,7 @@ angular.module('sc-authentication')
                 return $q.when(user);
               }
               else {
-                authenticationService.authenticate(environment, $location.url());
+                authenticationService.authenticate(environment, $window.location.href);
                 return $q.reject();
               }
             } /*,
