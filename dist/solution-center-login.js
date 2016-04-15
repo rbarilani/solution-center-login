@@ -21,7 +21,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         var TOKEN_COOKIE_KEY = "SC_TOKEN";
 
         function authenticate(environment, redirectUrl) {
-          isAuthenticated()
+          isAuthenticated(environment)
               .then(
                   function (token) {
                     // TODO login Only write if it's different than current value
@@ -62,9 +62,9 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
          * Returns a valid token in case the user is authenticated or null in case there's no user
          * @returns {*}
          */
-        function isAuthenticated() {
+        function isAuthenticated(environment) {
           var token = getToken();
-          return validateToken(token).then(
+          return validateToken(token, environment).then(
               function () {
                 // TODO remove - should never happen?
                 return $q.when(token);
@@ -82,7 +82,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
               });
         }
 
-        function validateToken(token) {
+        function validateToken(token, environment) {
           if (!token) {
             return $q.reject("null token");
           }
