@@ -7,7 +7,8 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
       '$window',
       '$injector',
       'jwtHelper',
-      function ($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper) {
+      '$location',
+      function ($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper, $location) {
 
         'use strict';
 
@@ -29,7 +30,15 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         }
 
         function redirectToLogin(environment, redirectUrl) {
-          $window.location.href = environments.getLoginUrl(environment) + "?redirect=" + redirectUrl;
+          var redirectionDomain = environments.getDomain(environment);
+          var redirectionPath = environments.getLoginPath() + "?redirect=" + redirectUrl;
+
+          if ($window.location.host === redirectionDomain) {
+            $location.url(redirectionPath);
+          }
+          else {
+            $window.location.href = redirectionDomain + "/#" + redirectionPath;
+          }
         }
 
         function logout(environment) {

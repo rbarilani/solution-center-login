@@ -19,12 +19,12 @@ angular.module('sc-authentication')
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         },
         LOCAL: {
-          url: 'http://localhost:{PORT}',
+          url: 'localhost:{PORT}',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         }
       };
 
-      function getUrl(environment) {
+      function getDomain(environment) {
         var url = environments[environment.name].url;
         if (environment.name === 'LOCAL') {
           url = url.replace('{PORT}', environment.port);
@@ -32,12 +32,12 @@ angular.module('sc-authentication')
         return url;
       }
 
-      function getLoginUrl(environment) {
-        return getUrl(environment) + '/#/login';
+      function getLoginPath() {
+        return '/login';
       }
 
-      function getLogourUrl(environment) {
-        return getUrl(environment) + '/#/logout';
+      function getLogourPath() {
+        return '/logout';
       }
 
       function getTokensAPI(environment) {
@@ -45,8 +45,9 @@ angular.module('sc-authentication')
       }
 
       return {
-        getLoginUrl: getLoginUrl,
-        getLogoutUrl: getLogourUrl,
+        getDomain: getDomain,
+        getLoginPath: getLoginPath,
+        getLogoutPath: getLogourPath,
         getTokensAPI: getTokensAPI
       };
     }

@@ -14,7 +14,8 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
       '$window',
       '$injector',
       'jwtHelper',
-      function ($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper) {
+      '$location',
+      function ($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper, $location) {
 
         'use strict';
 
@@ -36,7 +37,15 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         }
 
         function redirectToLogin(environment, redirectUrl) {
-          $window.location.href = environments.getLoginUrl(environment) + "?redirect=" + redirectUrl;
+          var redirectionDomain = environments.getDomain(environment);
+          var redirectionPath = environments.getLoginPath() + "?redirect=" + redirectUrl;
+
+          if ($window.location.host === redirectionDomain) {
+            $location.url(redirectionPath);
+          }
+          else {
+            $window.location.href = redirectionDomain + "/#" + redirectionPath;
+          }
         }
 
         function logout(environment) {
@@ -139,9 +148,10 @@ angular.module('sc-authentication')
             // Require that there is an authenticated user
             // (use this in a route resolve to prevent non-authenticated users from entering that route)
             requireAuthenticatedUser: function () {
-              var user = authenticationService.getUser();
-              if (user) {
-                return $q.when(user);
+              var token = authenticationService.getToken();
+              if (token) {
+
+                return $q.when(token);
               }
               else {
                 authenticationService.authenticate(environment, $window.location.href);
@@ -189,12 +199,12 @@ angular.module('sc-authentication')
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         },
         LOCAL: {
-          url: 'http://localhost:{PORT}',
+          url: 'localhost:{PORT}',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         }
       };
 
-      function getUrl(environment) {
+      function getDomain(environment) {
         var url = environments[environment.name].url;
         if (environment.name === 'LOCAL') {
           url = url.replace('{PORT}', environment.port);
@@ -202,12 +212,12 @@ angular.module('sc-authentication')
         return url;
       }
 
-      function getLoginUrl(environment) {
-        return getUrl(environment) + '/#/login';
+      function getLoginPath() {
+        return '/login';
       }
 
-      function getLogourUrl(environment) {
-        return getUrl(environment) + '/#/logout';
+      function getLogourPath() {
+        return '/logout';
       }
 
       function getTokensAPI(environment) {
@@ -215,8 +225,9 @@ angular.module('sc-authentication')
       }
 
       return {
-        getLoginUrl: getLoginUrl,
-        getLogoutUrl: getLogourUrl,
+        getDomain: getDomain,
+        getLoginPath: getLoginPath,
+        getLogoutPath: getLogourPath,
         getTokensAPI: getTokensAPI
       };
     }
