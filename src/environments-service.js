@@ -19,13 +19,17 @@ angular.module('sc-authentication')
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         },
         LOCAL: {
-          url: 'localhost',
+          url: 'localhost:{PORT}',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         }
       };
 
       function getUrl(environment) {
-        return environments[environment].url;
+        var url = environments[environment.name].url;
+        if (environment.name === 'LOCAL') {
+          url = url.replace('{PORT}', environment.port);
+        }
+        return url;
       }
 
       function getLoginUrl(environment) {

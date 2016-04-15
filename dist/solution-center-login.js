@@ -108,10 +108,16 @@ angular.module('sc-authentication')
     .provider('authorizationService', [function () {
       'use strict';
 
-      var environment = 'STAGE';
+      var environment = {
+        name: 'LOCAL',
+        port: '3000'
+      };
 
-      this.setEnvironment = function (env) {
-        environment = env;
+      this.configEnvironment = function (name, port) {
+        environment.name = name;
+        if (port) {
+          environment.port = port;
+        }
       };
 
       /*
@@ -183,13 +189,17 @@ angular.module('sc-authentication')
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         },
         LOCAL: {
-          url: 'localhost',
+          url: 'localhost:{PORT}',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         }
       };
 
       function getUrl(environment) {
-        return environments[environment].url;
+        var url = environments[environment.name].url;
+        if (environment.name === 'LOCAL') {
+          url = url.replace('{PORT}', environment.port);
+        }
+        return url;
       }
 
       function getLoginUrl(environment) {

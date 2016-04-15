@@ -2,10 +2,16 @@ angular.module('sc-authentication')
     .provider('authorizationService', [function () {
       'use strict';
 
-      var environment = 'STAGE';
+      var environment = {
+        name: 'LOCAL',
+        port: '3000'
+      };
 
-      this.setEnvironment = function (env) {
-        environment = env;
+      this.configEnvironment = function (name, port) {
+        environment.name = name;
+        if (port) {
+          environment.port = port;
+        }
       };
 
       /*
