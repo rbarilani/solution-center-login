@@ -19,7 +19,7 @@ angular.module('sc-authentication')
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         },
         LOCAL: {
-          url: 'localhost:{PORT}',
+          url: 'http://localhost:{PORT}',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         }
       };

@@ -36,8 +36,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         }
 
         function redirectToLogin(environment, redirectUrl) {
-          //$window.location.href = environments.getLoginUrl(environment) + "?redirect=" + encodeURIComponent(redirectUrl);
-          $window.location.href = "https://www.solutions.zalando.com";
+          $window.location.href = environments.getLoginUrl(environment) + "?redirect=" + redirectUrl;
         }
 
         function logout(environment) {
@@ -190,7 +189,7 @@ angular.module('sc-authentication')
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         },
         LOCAL: {
-          url: 'localhost:{PORT}',
+          url: 'http://localhost:{PORT}',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         }
       };
