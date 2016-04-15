@@ -1,5 +1,5 @@
 angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
-  .factory('solutionCenterAuth', [
+  .factory('authenticationService', [
     '$q',
     '$localStorage',
     '$cookies',
@@ -19,6 +19,8 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         if (!token) {
           redirectToLogin(environment, redirectUrl);
         }
+
+        // TODO login Only write if it's different than current value
 
         $localStorage.sc_token = token;
         $localStorage.sc_user = getUserFromToken(token);
