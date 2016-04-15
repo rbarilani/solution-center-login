@@ -6,112 +6,110 @@
 
 
 angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
-    .factory('authenticationService', [
-      '$q',
-      '$localStorage',
-      '$cookies',
-      'environments',
-      '$window',
-      '$injector',
-      'jwtHelper',
-      '$location',
-      function ($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper, $location) {
+  .factory('authenticationService', [
+    '$q',
+    '$localStorage',
+    '$cookies',
+    'environments',
+    '$window',
+    '$injector',
+    'jwtHelper',
+    '$location',
+    function ($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper, $location) {
 
-        'use strict';
+      'use strict';
 
-        var TOKEN_COOKIE_KEY = "SC_TOKEN";
+      var TOKEN_COOKIE_KEY = "SC_TOKEN";
 
-        function authenticate(environment, redirectUrl) {
-          isAuthenticated(environment)
-              .then(
-                  function (token) {
-                    // TODO login Only write if it's different than current value
-                    $localStorage.sc_token = token;
-                    $localStorage.sc_user = getUserFromToken(token);
+      function authenticate(environment, redirectUrl) {
+        //var token = ;
+        //if (!token) {
+        //  redirectToLogin(environment, redirectUrl);
+        //  return $q.reject();
+        //}
+        return validateToken(getToken(), environment).then(
+          function () {
+            $localStorage.sc_token = token;
+            $localStorage.sc_user = getUserFromToken(token);
 
-                    return token;
-                  },
-                  function () {
-                    redirectToLogin(environment, redirectUrl);
-                  });
-        }
-
-        function redirectToLogin(environment, redirectUrl) {
-          var redirectionDomain = environments.getDomain(environment);
-          var redirectionPath = environments.getLoginPath() + "?redirect=" + redirectUrl;
-
-          if ($window.location.host === redirectionDomain) {
-            $location.url(redirectionPath);
-          }
-          else {
-            $window.location.href = redirectionDomain + "/#" + redirectionPath;
-          }
-        }
-
-        function logout(environment) {
-          $localStorage.sc_token = null;
-          $localStorage.sc_user = null;
-
-          $window.location.href = environments.getLogoutUrl(environment);
-        }
-
-        function getToken() {
-          return $localStorage.sc_token || $cookies.get(TOKEN_COOKIE_KEY);
-        }
-
-        function getUser() {
-          return $localStorage.sc_user;
-        }
-
-        /*
-         PRIVATE METHODS
-         */
-
-        /**
-         * Returns a valid token in case the user is authenticated or null in case there's no user
-         * @returns {*}
-         */
-        function isAuthenticated(environment) {
-          var token = getToken();
-          return validateToken(token, environment).then(
-              function () {
-                // TODO remove - should never happen?
-                return $q.when(token);
-              },
-              function (response) {
-                // TODO test this
-                if (response.status === 304) {
-                  return $q.when(token);
-                }
-                if (response.status === 409) {
-                  var newToken = response.data;
-                  return $q.when(newToken);
-                }
-                return $q.reject();
-              });
-        }
-
-        function validateToken(token, environment) {
-          if (!token) {
-            return $q.reject("null token");
-          }
-
-          return $injector.get('$http').get(environments.getTokensAPI(environment), token);
-        }
-
-        function getUserFromToken(token) {
-          return jwtHelper.decodeToken(token);
-        }
-
-        return {
-          authenticate: authenticate,
-          redirectToLogin: redirectToLogin,
-          getToken: getToken,
-          logout: logout,
-          getUser: getUser
-        };
+            return $q.when(token);
+          },
+          function (response) {
+            if (response.status === 304) {
+              $localStorage.sc_token = token;
+              $localStorage.sc_user = getUserFromToken(token);
+              return $q.when(token);
+            }
+            if (response.status === 409) {
+              var newToken = response.data;
+              $localStorage.sc_token = newToken;
+              $localStorage.sc_user = getUserFromToken(newToken);
+              return $q.when(newToken);
+            }
+            redirectToLogin(environment, redirectUrl);
+            return $q.reject();
+          });
       }
-    ]);
+
+
+      function redirectToLogin(environment, redirectUrl) {
+        var redirectionDomain = environments.getDomain(environment);
+        var redirectionPath = environments.getLoginPath() + "?redirect=" + redirectUrl;
+
+        if ($window.location.host === redirectionDomain) {
+          $location.url(redirectionPath);
+        }
+        else {
+          $window.location.href = redirectionDomain + "/#" + redirectionPath;
+        }
+      }
+
+      function logout(environment) {
+        $localStorage.sc_token = null;
+        $localStorage.sc_user = null;
+
+        $window.location.href = environments.getLogoutUrl(environment);
+      }
+
+      function getToken() {
+        return $localStorage.sc_token || $cookies.get(TOKEN_COOKIE_KEY);
+      }
+
+      function getUser() {
+        return $localStorage.sc_user;
+      }
+
+      /*
+       PRIVATE METHODS
+       */
+
+      /**
+       * Returns a valid token in case the user is authenticated or null in case there's no user
+       * @returns {*}
+       */
+
+
+      function validateToken(token, environment) {
+        if (!token) {
+          return $q.reject("null token");
+        }
+
+        return $injector.get('$http').get(environments.getTokensAPI(environment), token);
+      }
+
+      function getUserFromToken(token) {
+        return jwtHelper.decodeToken(token);
+      }
+
+      return {
+        authenticate: authenticate,
+        redirectToLogin: redirectToLogin,
+        getToken: getToken,
+        logout: logout,
+        getUser: getUser
+      };
+    }
+  ]);
 
 angular.module('sc-authentication')
     .provider('authorizationService', [function () {
@@ -148,15 +146,7 @@ angular.module('sc-authentication')
             // Require that there is an authenticated user
             // (use this in a route resolve to prevent non-authenticated users from entering that route)
             requireAuthenticatedUser: function () {
-              var token = authenticationService.getToken();
-              if (token) {
-
-                return $q.when(token);
-              }
-              else {
-                authenticationService.authenticate(environment, $window.location.href);
-                return $q.reject();
-              }
+              return authenticationService.authenticate(environment, $window.location.href);
             } /*,
 
             // Redirect to home page in case there is a user already authenticated

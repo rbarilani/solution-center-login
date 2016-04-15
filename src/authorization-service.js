@@ -33,14 +33,7 @@ angular.module('sc-authentication')
             // Require that there is an authenticated user
             // (use this in a route resolve to prevent non-authenticated users from entering that route)
             requireAuthenticatedUser: function () {
-              var user = authenticationService.getUser();
-              if (user) {
-                return $q.when(user);
-              }
-              else {
-                authenticationService.authenticate(environment, $window.location.href);
-                return $q.reject();
-              }
+              return authenticationService.authenticate(environment, $window.location.href);
             } /*,
 
             // Redirect to home page in case there is a user already authenticated
