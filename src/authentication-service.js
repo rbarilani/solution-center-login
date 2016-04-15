@@ -75,7 +75,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
       }
 
       function validateToken(token) {
-        if (token === null) {
+        if (!token) {
           return $q.reject("null token");
         }
 
