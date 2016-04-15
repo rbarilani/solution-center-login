@@ -15,35 +15,33 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
       var TOKEN_COOKIE_KEY = "SC_TOKEN";
 
       function authenticate(environment, redirectUrl) {
-        //var token = ;
-        //if (!token) {
-        //  redirectToLogin(environment, redirectUrl);
-        //  return $q.reject();
-        //}
-        return validateToken(getToken(), environment).then(
-          function () {
-            $localStorage.sc_token = token;
-            $localStorage.sc_user = getUserFromToken(token);
+        var token = getToken();
 
-            return $q.when(token);
-          },
-          function (response) {
-            if (response.status === 304) {
-              $localStorage.sc_token = token;
-              $localStorage.sc_user = getUserFromToken(token);
-              return $q.when(token);
-            }
-            if (response.status === 409) {
-              var newToken = response.data;
-              $localStorage.sc_token = newToken;
-              $localStorage.sc_user = getUserFromToken(newToken);
-              return $q.when(newToken);
-            }
-            redirectToLogin(environment, redirectUrl);
-            return $q.reject();
-          });
+        return validateToken(token, environment)
+            .then(
+              function () {
+                return storeCredentials(token);
+              },
+              function (response) {
+                if (response.status === 304) {
+                  return storeCredentials(token);
+                }
+                else if (response.status === 409) {
+                  var newToken = response.data;
+                  return storeCredentials(newToken);
+                }
+                redirectToLogin(environment, redirectUrl);
+                return $q.reject();
+              }
+            );
       }
 
+      function storeCredentials(token) {
+        $localStorage.sc_token = token;
+        $localStorage.sc_user = getUserFromToken(token);
+
+        return $q.when(token);
+      }
 
       function redirectToLogin(environment, redirectUrl) {
         var redirectionDomain = environments.getDomain(environment);
@@ -76,18 +74,13 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
        PRIVATE METHODS
        */
 
-      /**
-       * Returns a valid token in case the user is authenticated or null in case there's no user
-       * @returns {*}
-       */
-
-
       function validateToken(token, environment) {
         if (!token) {
           return $q.reject("null token");
         }
 
-        return $injector.get('$http').get(environments.getTokensAPI(environment), token);
+        return $injector.get('$http')
+            .get(environments.getTokensAPI(environment.name), token);
       }
 
       function getUserFromToken(token) {
