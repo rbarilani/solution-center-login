@@ -12,9 +12,9 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
     '$cookies',
     'environments',
     '$location',
-    '$http',
+    '$injector',
     'jwtHelper',
-    function ($q, $localStorage, $cookies, environments, $location, $http, jwtHelper) {
+    function ($q, $localStorage, $cookies, environments, $location, $injector, jwtHelper) {
 
       'use strict';
 
@@ -86,7 +86,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
           return $q.reject("null token");
         }
 
-        return $http.get(environments.getTokensAPI(), token);
+        return $injector.get('$http').get(environments.getTokensAPI(), token);
       }
 
       function getUserFromToken(token) {
