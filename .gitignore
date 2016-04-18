@@ -3,6 +3,7 @@ node_modules/
 bower_components/
 dist/
 npm-debug.log
+test/coverage
 
 #### Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
 

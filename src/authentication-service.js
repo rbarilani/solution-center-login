@@ -15,7 +15,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
           }
         },
 
-        getEnvironment: function() {
+        getEnvironment: function () {
           return environment;
         },
 
@@ -32,6 +32,20 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
   var self = this;
   var TOKEN_COOKIE_KEY = "SC_TOKEN";
 
+  var service = {
+    requireAuthenticatedUser: requireAuthenticatedUser,
+    authenticate: authenticate,
+    redirectToLogin: redirectToLogin,
+    getToken: getToken,
+    logout: logout,
+    getUser: getUser,
+    validateToken: validateToken
+  };
+
+  return service;
+
+  ///////////////////////////////////
+
   // Require that there is an authenticated user
   // (use this in a route resolve to prevent non-authenticated users from entering that route)
   function requireAuthenticatedUser() {
@@ -41,18 +55,18 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
   // Redirect to home page in case there is a user already authenticated
   // (use this in the login resolve to prevent users seeing the login dialog when they are already authenticated)
   /*
-  function redirectToHomeIfAuthenticated() {
-    return security.requestCurrentUser()
-        .then(
-            function () {
-              security.showHomePage();
-              return $q.reject();
-            },
-            function () {
-              return $q.when();
-            });
-  }
-  */
+   function redirectToHomeIfAuthenticated() {
+   return security.requestCurrentUser()
+   .then(
+   function () {
+   security.showHomePage();
+   return $q.reject();
+   },
+   function () {
+   return $q.when();
+   });
+   }
+   */
 
   function authenticate(redirectUrl) {
     var token = getToken();
@@ -74,13 +88,6 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
               return $q.reject();
             }
         );
-  }
-
-  function storeCredentials(token) {
-    $localStorage.sc_token = token;
-    $localStorage.sc_user = getUserFromToken(token);
-
-    return $q.when(token);
   }
 
   function redirectToLogin(redirectUrl) {
@@ -105,10 +112,6 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
     return $localStorage.sc_user;
   }
 
-  /*
-   PRIVATE METHODS
-   */
-
   function validateToken(token) {
     if (!token) {
       return $q.reject("There is no token");
@@ -116,6 +119,17 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
 
     return $injector.get('$http')
         .get(environments.getTokensAPI(self.getEnvironment()), token);
+  }
+
+  /*
+   PRIVATE METHODS
+   */
+
+  function storeCredentials(token) {
+    $localStorage.sc_token = token;
+    $localStorage.sc_user = getUserFromToken(token);
+
+    return $q.when(token);
   }
 
   function getUserFromToken(token) {
@@ -138,13 +152,4 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
       $window.location.href = redirectionHost + "/#" + redirectionPath;
     }
   }
-
-  return {
-    authenticate: authenticate,
-    redirectToLogin: redirectToLogin,
-    getToken: getToken,
-    logout: logout,
-    getUser: getUser,
-    requireAuthenticatedUser: requireAuthenticatedUser
-  };
 }

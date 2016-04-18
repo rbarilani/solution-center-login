@@ -1,10 +1,9 @@
 var fs = require('fs');
 var gulp = require('gulp');
-var karma = require('karma').server;
+var karma = require('karma');
 var concat = require('gulp-concat');
 var header = require('gulp-header');
 var rename = require('gulp-rename');
-var es = require('event-stream');
 var del = require('del');
 var uglify = require('gulp-uglify');
 var plumber = require('gulp-plumber');
@@ -62,10 +61,10 @@ gulp.task('lint-test', function(){
 });
 
 gulp.task('karma', ['build'], function (done) {
-    karma.start({
+  new karma.Server({
         configFile: __dirname + '/karma.conf.js',
         singleRun: true
-    }, done);
+    }, done).start();
 });
 
 function handleError(err) {
