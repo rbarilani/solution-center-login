@@ -36,18 +36,18 @@ angular.module('sc-authentication')
         return '/login';
       }
 
-      function getLogourPath() {
+      function getLogoutPath() {
         return '/logout';
       }
 
       function getTokensAPI(environment) {
-        return environments[environment].tokenservice + '/tokens';
+        return environments[environment.name].tokenservice + '/tokens';
       }
 
       return {
         getDomain: getDomain,
         getLoginPath: getLoginPath,
-        getLogoutPath: getLogourPath,
+        getLogoutPath: getLogoutPath,
         getTokensAPI: getTokensAPI
       };
     }

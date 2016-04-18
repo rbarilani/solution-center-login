@@ -8,6 +8,7 @@
     "sourceType": "module"
   },
   "rules": {
+    "angular/di": [2,"array"]
   },
   "globals": {
     "angular": true,

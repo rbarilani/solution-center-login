@@ -1,98 +1,150 @@
 angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
-  .factory('authenticationService', [
-    '$q',
-    '$localStorage',
-    '$cookies',
-    'environments',
-    '$window',
-    '$injector',
-    'jwtHelper',
-    '$location',
-    function ($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper, $location) {
-
+    .provider('authenticationService', [function () {
       'use strict';
 
-      var TOKEN_COOKIE_KEY = "SC_TOKEN";
-
-      function authenticate(environment, redirectUrl) {
-        var token = getToken();
-
-        return validateToken(token, environment)
-            .then(
-              function () {
-                return storeCredentials(token);
-              },
-              function (response) {
-                if (response.status === 304) {
-                  return storeCredentials(token);
-                }
-                else if (response.status === 409) {
-                  var newToken = response.data;
-                  return storeCredentials(newToken);
-                }
-                redirectToLogin(environment, redirectUrl);
-                return $q.reject();
-              }
-            );
-      }
-
-      function storeCredentials(token) {
-        $localStorage.sc_token = token;
-        $localStorage.sc_user = getUserFromToken(token);
-
-        return $q.when(token);
-      }
-
-      function redirectToLogin(environment, redirectUrl) {
-        var redirectionDomain = environments.getDomain(environment);
-        var redirectionPath = environments.getLoginPath() + "?redirect=" + redirectUrl;
-
-        if ($window.location.host === redirectionDomain) {
-          $location.url(redirectionPath);
-        }
-        else {
-          $window.location.href = redirectionDomain + "/#" + redirectionPath;
-        }
-      }
-
-      function logout(environment) {
-        $localStorage.sc_token = null;
-        $localStorage.sc_user = null;
-
-        $window.location.href = environments.getLogoutUrl(environment);
-      }
-
-      function getToken() {
-        return $localStorage.sc_token || $cookies.get(TOKEN_COOKIE_KEY);
-      }
-
-      function getUser() {
-        return $localStorage.sc_user;
-      }
-
-      /*
-       PRIVATE METHODS
-       */
-
-      function validateToken(token, environment) {
-        if (!token) {
-          return $q.reject("null token");
-        }
-
-        return $injector.get('$http')
-            .get(environments.getTokensAPI(environment.name), token);
-      }
-
-      function getUserFromToken(token) {
-        return jwtHelper.decodeToken(token);
-      }
+      var environment = {
+        name: 'LOCAL',
+        port: '3000'
+      };
 
       return {
-        authenticate: authenticate,
-        redirectToLogin: redirectToLogin,
-        getToken: getToken,
-        logout: logout,
-        getUser: getUser
+        configEnvironment: function (name, port) {
+          environment.name = name;
+          if (port) {
+            environment.port = port;
+          }
+        },
+
+        getEnvironment: function() {
+          return environment;
+        },
+
+        $get: [
+          '$q', '$localStorage', '$cookies', 'environments', '$window', '$injector', 'jwtHelper', '$location',
+          authenticationFactory
+        ]
       };
+    }]);
+
+function authenticationFactory($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper, $location) {
+  'use strict';
+
+  var self = this;
+  var TOKEN_COOKIE_KEY = "SC_TOKEN";
+
+  // Require that there is an authenticated user
+  // (use this in a route resolve to prevent non-authenticated users from entering that route)
+  function requireAuthenticatedUser() {
+    return authenticate($window.location.href);
+  }
+
+  // Redirect to home page in case there is a user already authenticated
+  // (use this in the login resolve to prevent users seeing the login dialog when they are already authenticated)
+  /*
+  function redirectToHomeIfAuthenticated() {
+    return security.requestCurrentUser()
+        .then(
+            function () {
+              security.showHomePage();
+              return $q.reject();
+            },
+            function () {
+              return $q.when();
+            });
+  }
+  */
+
+  function authenticate(redirectUrl) {
+    var token = getToken();
+
+    return validateToken(token)
+        .then(
+            function () {
+              return storeCredentials(token);
+            },
+            function (response) {
+              if (response.status === 304) {
+                return storeCredentials(token);
+              }
+              else if (response.status === 409) {
+                var newToken = response.data;
+                return storeCredentials(newToken);
+              }
+              redirectToLogin(redirectUrl);
+              return $q.reject();
+            }
+        );
+  }
+
+  function storeCredentials(token) {
+    $localStorage.sc_token = token;
+    $localStorage.sc_user = getUserFromToken(token);
+
+    return $q.when(token);
+  }
+
+  function redirectToLogin(redirectUrl) {
+    var redirectionPath = environments.getLoginPath() + "?redirect=" + redirectUrl;
+
+    redirect(redirectionPath);
+  }
+
+  function logout() {
+    $localStorage.sc_token = null;
+    $localStorage.sc_user = null;
+
+    var redirectPath = environments.getLogoutPath();
+    redirect(redirectPath);
+  }
+
+  function getToken() {
+    return $localStorage.sc_token || $cookies.get(TOKEN_COOKIE_KEY);
+  }
+
+  function getUser() {
+    return $localStorage.sc_user;
+  }
+
+  /*
+   PRIVATE METHODS
+   */
+
+  function validateToken(token) {
+    if (!token) {
+      return $q.reject("There is no token");
     }
-  ]);
+
+    return $injector.get('$http')
+        .get(environments.getTokensAPI(self.getEnvironment()), token);
+  }
+
+  function getUserFromToken(token) {
+    return jwtHelper.decodeToken(token);
+  }
+
+  /**
+   * Redirects to another URL using different handlers depending whether both origin and target have the same
+   * host or not because of problems with the usage of # in URLs together with redirection using $window
+   * @param redirectionPath
+   */
+  function redirect(redirectionPath) {
+    redirectionPath = redirectionPath || '/';
+    var redirectionHost = environments.getDomain(self.getEnvironment());
+
+    if ($window.location.host === redirectionHost) {
+      $location.url(redirectionPath);
+    }
+    else {
+      $window.location.href = redirectionHost + "/#" + redirectionPath;
+    }
+  }
+
+  return {
+    authenticate: authenticate,
+    redirectToLogin: redirectToLogin,
+    getToken: getToken,
+    logout: logout,
+    getUser: getUser,
+    requireAuthenticatedUser: requireAuthenticatedUser
+  };
+}
