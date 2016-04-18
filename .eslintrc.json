@@ -1,0 +1,22 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "angular"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "rules": {
+  },
+  "globals": {
+    "angular": true,
+    "jQuery": false,
+    "$": true
+  },
+  "env": {
+    "browser": true,
+    "jasmine": true,
+    "jquery": true
+  }
+}
