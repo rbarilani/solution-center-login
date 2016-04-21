@@ -34,6 +34,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
 
   var service = {
     requireAuthenticatedUser: requireAuthenticatedUser,
+    redirectToHomeIfAuthenticated: redirectToHomeIfAuthenticated,
     authenticate: authenticate,
     redirectToLogin: redirectToLogin,
     getToken: getToken,
@@ -49,30 +50,26 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
   // Require that there is an authenticated user
   // (use this in a route resolve to prevent non-authenticated users from entering that route)
   function requireAuthenticatedUser() {
-    return this.authenticate($window.location.href);
+    return service.authenticate($window.location.href);
   }
 
   // Redirect to home page in case there is a user already authenticated
   // (use this in the login resolve to prevent users seeing the login dialog when they are already authenticated)
-  /*
-   function redirectToHomeIfAuthenticated() {
-   return security.requestCurrentUser()
-   .then(
-   function () {
-   security.showHomePage();
-   return $q.reject();
-   },
-   function () {
-   return $q.when();
-   });
-   }
-   */
+  function redirectToHomeIfAuthenticated() {
+    if (service.isAuthenticated()) {
+      redirect();
+      return $q.reject();
+    }
+    else {
+      return $q.when();
+    }
+  }
 
   function authenticate(redirectUrl) {
     var token = service.getToken();
 
     /* TODO
-       Validate redirectUrl is in the same domain!!!
+     Validate redirectUrl is in the same domain!!!
      */
 
     return validateToken(token)
@@ -152,7 +149,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
   /**
    * Redirects to another URL using different handlers depending whether both origin and target have the same
    * host or not because of problems with the usage of # in URLs together with redirection using $window
-   * @param redirectionPath
+   * @param redirectionPath path to redirect to. It falls back to home page if undefined
    */
   function redirect(redirectionPath) {
     redirectionPath = redirectionPath || '/';

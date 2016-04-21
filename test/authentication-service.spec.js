@@ -36,6 +36,7 @@ describe('authenticationService', function () {
   describe('initial state', function () {
     it('has known state', function () {
       expect(authenticationService.requireAuthenticatedUser).toBeDefined();
+      expect(authenticationService.redirectToHomeIfAuthenticated).toBeDefined();
       expect(authenticationService.authenticate).toBeDefined();
       expect(authenticationService.redirectToLogin).toBeDefined();
       expect(authenticationService.getToken).toBeDefined();
