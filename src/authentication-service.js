@@ -38,8 +38,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
     redirectToLogin: redirectToLogin,
     getToken: getToken,
     logout: logout,
-    getUser: getUser,
-    validateToken: validateToken
+    getUser: getUser
   };
 
   return service;
@@ -49,7 +48,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
   // Require that there is an authenticated user
   // (use this in a route resolve to prevent non-authenticated users from entering that route)
   function requireAuthenticatedUser() {
-    return authenticate($window.location.href);
+    return this.authenticate($window.location.href);
   }
 
   // Redirect to home page in case there is a user already authenticated
@@ -69,7 +68,11 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
    */
 
   function authenticate(redirectUrl) {
-    var token = getToken();
+    var token = service.getToken();
+
+    /* TODO
+       Validate redirectUrl is in the same domain!!!
+     */
 
     return validateToken(token)
         .then(
@@ -84,7 +87,8 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
                 var newToken = response.data;
                 return storeCredentials(newToken);
               }
-              redirectToLogin(redirectUrl);
+              clearCredentials();
+              service.redirectToLogin(redirectUrl);
               return $q.reject();
             }
         );
@@ -97,8 +101,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
   }
 
   function logout() {
-    $localStorage.sc_token = null;
-    $localStorage.sc_user = null;
+    clearCredentials();
 
     var redirectPath = environments.getLogoutPath();
     redirect(redirectPath);
@@ -112,15 +115,6 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
     return $localStorage.sc_user;
   }
 
-  function validateToken(token) {
-    if (!token) {
-      return $q.reject("There is no token");
-    }
-
-    return $injector.get('$http')
-        .get(environments.getTokensAPI(self.getEnvironment()), token);
-  }
-
   /*
    PRIVATE METHODS
    */
@@ -130,6 +124,20 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
     $localStorage.sc_user = getUserFromToken(token);
 
     return $q.when(token);
+  }
+
+  function clearCredentials() {
+    $localStorage.sc_token = null;
+    $localStorage.sc_user = null;
+  }
+
+  function validateToken(token) {
+    if (!token) {
+      return $q.reject("There is no token");
+    }
+
+    return $injector.get('$http')
+        .get(environments.getTokensAPI(self.getEnvironment()), token);
   }
 
   function getUserFromToken(token) {

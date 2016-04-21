@@ -18,8 +18,8 @@ module.exports = function(config) {
       'bower_components/ngstorage/ngStorage.js',
       'bower_components/angular-cookies/angular-cookies.js',
 
-      'dist/solution-center-login.js',
-      'test/*.spec.js'
+      'src/**/*.js',
+      'test/**/*.spec.js'
     ],
 
     // List of files to exclude
@@ -28,7 +28,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/*.js': ['coverage']
+      'src/**/*.js': ['coverage']
     },
 
     // test results reporter to use
