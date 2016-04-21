@@ -38,6 +38,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
     redirectToLogin: redirectToLogin,
     getToken: getToken,
     logout: logout,
+    isAuthenticated: isAuthenticated,
     getUser: getUser
   };
 
@@ -109,6 +110,10 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
 
   function getToken() {
     return $localStorage.sc_token || $cookies.get(TOKEN_COOKIE_KEY);
+  }
+
+  function isAuthenticated() {
+    return service.getUser() !== null;
   }
 
   function getUser() {

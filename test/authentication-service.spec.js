@@ -185,6 +185,24 @@ describe('authenticationService', function () {
   });
 
   /**
+   * isAuthenticated
+   */
+  describe('isAuthenticated', function () {
+    it('returns true if there is an authenticated user', function () {
+      $localStorage.sc_user = mockedUser;
+
+      expect(authenticationService.isAuthenticated()).toBeTruthy();
+    });
+
+    it('returns true if there is no authenticated user', function () {
+      $localStorage.sc_user = null;
+
+      expect(authenticationService.isAuthenticated()).toBeFalsy();
+    });
+  });
+
+
+  /**
    * getUser
    */
 
