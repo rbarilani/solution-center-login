@@ -1,7 +1,7 @@
 describe('authenticationService', function () {
   'use strict';
 
-  var $rootScope, authenticationService, $q, $localStorage, $cookies, environments, $location,
+  var $rootScope, authenticationService, $q, $localStorage, $cookies, environmentsService, $location,
       $httpBackend, jwtHelper, $window;
 
   var mockedToken = 'JWT_TOKEN';
@@ -14,20 +14,20 @@ describe('authenticationService', function () {
     module('sc-authentication', 'angular-jwt', 'ngStorage', 'ngCookies');
 
     inject(
-        function (_$rootScope_, _authenticationService_, _$q_, _$localStorage_, _$cookies_, _environments_, _$location_,
+        function (_$rootScope_, _authenticationService_, _$q_, _$localStorage_, _$cookies_, _environmentsService_, _$location_,
                   _$httpBackend_, _jwtHelper_, _$window_) {
           $rootScope = _$rootScope_;
           authenticationService = _authenticationService_;
           $q = _$q_;
           $localStorage = _$localStorage_;
           $cookies = _$cookies_;
-          environments = _environments_;
+          environmentsService = _environmentsService_;
           $location = _$location_;
           $httpBackend = _$httpBackend_;
           jwtHelper = _jwtHelper_;
           $window = _$window_;
 
-          spyOn(environments, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
+          spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
           spyOn(jwtHelper, 'decodeToken').and.returnValue(mockedUser);
           spyOn($location, 'url').and.callFake(mockedFunction);
         });
@@ -42,6 +42,56 @@ describe('authenticationService', function () {
       expect(authenticationService.getToken).toBeDefined();
       expect(authenticationService.logout).toBeDefined();
       expect(authenticationService.getUser).toBeDefined();
+    });
+  });
+
+  /**
+   * requireAuthenticatedUser
+   */
+
+  describe('requireAuthenticatedUser', function () {
+    it('tries to authenticate the user', function () {
+      spyOn(authenticationService, 'authenticate').and.callFake(mockedFunction);
+
+      authenticationService.requireAuthenticatedUser();
+
+      expect(authenticationService.authenticate).toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * redirectToHomeIfAuthenticated
+   */
+
+  describe('redirectToHomeIfAuthenticated', function () {
+    it('redirects to home page if the user is authenticated', function () {
+      var rejected = false;
+
+      spyOn(authenticationService, 'isAuthenticated').and.returnValue(true);
+      spyOn(environmentsService, 'getDomain').and.returnValue($window.location.host);
+
+      authenticationService.redirectToHomeIfAuthenticated()
+          .catch(function() {
+            rejected = true;
+          });
+      $rootScope.$digest();
+
+      expect($location.url).toHaveBeenCalled();
+      expect(rejected).toBeTruthy();
+    });
+
+    it('allows to land in the login page if the user is not authenticated', function () {
+      var resolved = false;
+
+      spyOn(authenticationService, 'isAuthenticated').and.returnValue(false);
+
+      authenticationService.redirectToHomeIfAuthenticated()
+          .then(function() {
+            resolved = true;
+          });
+      $rootScope.$digest();
+
+      expect(resolved).toBeTruthy();
     });
   });
 
@@ -136,7 +186,7 @@ describe('authenticationService', function () {
 
   describe('redirectToLogin', function () {
     it('uses $location to redirect if the url to redirect to is in the same domain as the login app', function () {
-      spyOn(environments, 'getDomain').and.returnValue($window.location.host);
+      spyOn(environmentsService, 'getDomain').and.returnValue($window.location.host);
 
       authenticationService.redirectToLogin(mockedRedirectionUrl);
 
@@ -144,7 +194,7 @@ describe('authenticationService', function () {
     });
 
     xit('uses $window to redirect if the url to redirect to is in a different domain than the login app', function () {
-      spyOn(environments, 'getDomain').and.returnValue('DIFFERENT_DOMAIN');
+      spyOn(environmentsService, 'getDomain').and.returnValue('DIFFERENT_DOMAIN');
 
       authenticationService.redirectToLogin(mockedRedirectionUrl);
 
@@ -182,6 +232,36 @@ describe('authenticationService', function () {
       spyOn($cookies, 'get').and.returnValue(null);
 
       expect(authenticationService.getUser()).toEqual(null);
+    });
+  });
+
+  /**
+   * logout
+   */
+
+  describe('logout', function () {
+    beforeEach(function() {
+      spyOn(environmentsService, 'getDomain').and.returnValue($window.location.host);
+    });
+
+    it('clears the stored credentials', function () {
+      $localStorage.sc_token = mockedToken;
+      $localStorage.sc_user = mockedUser;
+
+      authenticationService.logout();
+
+      expect($localStorage.sc_token).toBe(null);
+      expect($localStorage.sc_user).toBe(null);
+    });
+
+    it('redirects to logout page', function () {
+      var mockedLogoutPath = '/LOGOUT';
+
+      spyOn(environmentsService, 'getLogoutPath').and.returnValue(mockedLogoutPath);
+
+      authenticationService.logout();
+
+      expect($location.url).toHaveBeenCalledWith(mockedLogoutPath);
     });
   });
 

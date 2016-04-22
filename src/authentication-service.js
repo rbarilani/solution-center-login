@@ -20,13 +20,13 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         },
 
         $get: [
-          '$q', '$localStorage', '$cookies', 'environments', '$window', '$injector', 'jwtHelper', '$location',
+          '$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location',
           authenticationFactory
         ]
       };
     }]);
 
-function authenticationFactory($q, $localStorage, $cookies, environments, $window, $injector, jwtHelper, $location) {
+function authenticationFactory($q, $localStorage, $cookies, environmentsService, $window, $injector, jwtHelper, $location) {
   'use strict';
 
   var self = this;
@@ -93,7 +93,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
   }
 
   function redirectToLogin(redirectUrl) {
-    var redirectionPath = environments.getLoginPath() + "?redirect=" + redirectUrl;
+    var redirectionPath = environmentsService.getLoginPath() + "?redirect=" + redirectUrl;
 
     redirect(redirectionPath);
   }
@@ -101,7 +101,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
   function logout() {
     clearCredentials();
 
-    var redirectPath = environments.getLogoutPath();
+    var redirectPath = environmentsService.getLogoutPath();
     redirect(redirectPath);
   }
 
@@ -139,7 +139,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
     }
 
     return $injector.get('$http')
-        .get(environments.getTokensAPI(self.getEnvironment()), token);
+        .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
   }
 
   function getUserFromToken(token) {
@@ -153,7 +153,7 @@ function authenticationFactory($q, $localStorage, $cookies, environments, $windo
    */
   function redirect(redirectionPath) {
     redirectionPath = redirectionPath || '/';
-    var redirectionHost = environments.getDomain(self.getEnvironment());
+    var redirectionHost = environmentsService.getDomain(self.getEnvironment());
 
     if ($window.location.host === redirectionHost) {
       $location.url(redirectionPath);

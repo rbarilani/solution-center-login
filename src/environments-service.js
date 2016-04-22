@@ -1,35 +1,35 @@
 angular.module('sc-authentication')
-  .factory('environments', [
+  .factory('environmentsService', [
     function () {
       var environments = {
         PRODUCTION: {
-          url: 'solutions.zalando.com',
+          domain: 'solutions.zalando.com',
           tokenservice: 'https://token-management.norris.zalan.do'
         },
         INTEGRATION: {
-          url: 'usf-integration.norris.zalan.do',
+          domain: 'usf-integration.norris.zalan.do',
           tokenservice: 'https://tm-integration.norris.zalan.do'
         },
         STAGING: {
-          url: 'usf-stage.norris.zalan.do',
+          domain: 'usf-stage.norris.zalan.do',
           tokenservice: 'https://tm-stage.norris.zalan.do'
         },
         DEVELOPMENT: {
-          url: 'usf-dev.norris.zalan.do',
+          domain: 'usf-dev.norris.zalan.do',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         },
         LOCAL: {
-          url: 'localhost:{PORT}',
+          domain: 'localhost:{PORT}',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do'
         }
       };
 
       function getDomain(environment) {
-        var url = environments[environment.name].url;
+        var domain = environments[environment.name].domain;
         if (environment.name === 'LOCAL') {
-          url = url.replace('{PORT}', environment.port);
+          domain = domain.replace('{PORT}', environment.port);
         }
-        return url;
+        return domain;
       }
 
       function getLoginPath() {
