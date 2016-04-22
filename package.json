@@ -36,7 +36,7 @@
     "phantomjs-prebuilt": "^2.1.4"
   },
   "directories": {},
-  "homepage": "https://github.com/zalando/solution-center-login",
+  "homepage": "https://github.com/zalando-incubator/solution-center-login",
   "keywords": [
     "angular",
     "angularjs",
@@ -57,11 +57,11 @@
   "optionalDependencies": {},
   "repository": {
     "type": "git",
-    "url": "https://github.com/zalando/solution-center-login.git"
+    "url": "https://github.com/zalando-incubator/solution-center-login.git"
   },
   "main": "dist/solution-center-login.js",
   "scripts": {
     "test": "./node_modules/gulp/bin/gulp.js test"
   },
-  "version": "0.0.1"
+  "version": "0.1.0"
 }
