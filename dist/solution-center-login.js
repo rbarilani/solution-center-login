@@ -1,0 +1,243 @@
+/*!
+ * solution-center-login
+ * https://github.com/zalando-incubator/solution-center-login
+ * License: MIT
+ */
+
+
+angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
+    .provider('authenticationService', [function () {
+      'use strict';
+
+      var environment = {
+        name: 'LOCAL',
+        port: '3000'
+      };
+
+      return {
+        configEnvironment: function (name, port) {
+          environment.name = name;
+          if (port) {
+            environment.port = port;
+          }
+        },
+
+        getEnvironment: function () {
+          return environment;
+        },
+
+        $get: [
+          '$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location',
+          authenticationFactory
+        ]
+      };
+    }]);
+
+function authenticationFactory($q, $localStorage, $cookies, environmentsService, $window, $injector, jwtHelper, $location) {
+  'use strict';
+
+  var self = this;
+  var TOKEN_COOKIE_KEY = "SC_TOKEN";
+
+  var service = {
+    requireAuthenticatedUser: requireAuthenticatedUser,
+    redirectToHomeIfAuthenticated: redirectToHomeIfAuthenticated,
+    authenticate: authenticate,
+    redirectToLogin: redirectToLogin,
+    getToken: getToken,
+    logout: logout,
+    isAuthenticated: isAuthenticated,
+    getUser: getUser
+  };
+
+  return service;
+
+  ///////////////////////////////////
+
+  // Require that there is an authenticated user
+  // (use this in a route resolve to prevent non-authenticated users from entering that route)
+  function requireAuthenticatedUser() {
+    return service.authenticate($window.location.href);
+  }
+
+  // Redirect to home page in case there is a user already authenticated
+  // (use this in the login resolve to prevent users seeing the login dialog when they are already authenticated)
+  function redirectToHomeIfAuthenticated() {
+    if (service.isAuthenticated()) {
+      redirect();
+      return $q.reject();
+    }
+    else {
+      return $q.when();
+    }
+  }
+
+  function authenticate(redirectUrl) {
+    var token = service.getToken();
+
+    return validateToken(token)
+        .then(
+            function () {
+              return storeCredentials(token);
+            },
+            function (response) {
+              if (response.status === 304) {
+                return storeCredentials(token);
+              }
+              else if (response.status === 409) {
+                var newToken = response.data;
+                return storeCredentials(newToken);
+              }
+              clearCredentials();
+              service.redirectToLogin(redirectUrl);
+              return $q.reject();
+            }
+        );
+  }
+
+  function redirectToLogin(redirectUrl) {
+    var redirectionPath = environmentsService.getLoginPath();
+
+    if (isValidRedirectionUrl(redirectUrl)) {
+      redirectionPath += "?redirect=" + redirectUrl;
+    }
+
+    redirect(redirectionPath);
+  }
+
+  function logout() {
+    clearCredentials();
+
+    var redirectPath = environmentsService.getLogoutPath();
+    redirect(redirectPath);
+  }
+
+  function getToken() {
+    return $localStorage.sc_token || $cookies.get(TOKEN_COOKIE_KEY);
+  }
+
+  function isAuthenticated() {
+    return service.getUser() !== null;
+  }
+
+  function getUser() {
+    return $localStorage.sc_user;
+  }
+
+  /*
+   PRIVATE METHODS
+   */
+
+  function storeCredentials(token) {
+    $localStorage.sc_token = token;
+    $localStorage.sc_user = getUserFromToken(token);
+
+    return $q.when(token);
+  }
+
+  function clearCredentials() {
+    $localStorage.sc_token = null;
+    $localStorage.sc_user = null;
+  }
+
+  function validateToken(token) {
+    if (!token) {
+      return $q.reject("There is no token");
+    }
+
+    return $injector.get('$http')
+        .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
+  }
+
+  function getUserFromToken(token) {
+    return jwtHelper.decodeToken(token);
+  }
+
+  function isValidRedirectionUrl(redirectionUrl) {
+    var domain = environmentsService.getDomain(self.getEnvironment());
+
+    return redirectionUrl.indexOf(domain) !== -1;
+  }
+
+  /**
+   * Redirects to another URL using different handlers depending whether both origin and target have the same
+   * host or not because of problems with the usage of # in URLs together with redirection using $window
+   * @param redirectionPath path to redirect to. It falls back to home page if undefined
+   */
+  function redirect(redirectionPath) {
+    redirectionPath = redirectionPath || '/';
+    var redirectionHost = environmentsService.getSolutionCenterUrl(self.getEnvironment());
+
+    if ($window.location.host === redirectionHost) {
+      $location.url(redirectionPath);
+    }
+    else {
+      $window.location.href = redirectionHost + "/#" + redirectionPath;
+    }
+  }
+}
+
+angular.module('sc-authentication')
+  .factory('environmentsService', [
+    function () {
+      var environments = {
+        PRODUCTION: {
+          url: 'solutions.zalando.com',
+          tokenservice: 'https://token-management.norris.zalan.do',
+          domain: 'solutions.zalando.com'
+        },
+        INTEGRATION: {
+          url: 'usf-integration.norris.zalan.do',
+          tokenservice: 'https://tm-integration.norris.zalan.do',
+          domain: '.zalan.do'
+        },
+        STAGING: {
+          url: 'usf-stage.norris.zalan.do',
+          tokenservice: 'https://tm-stage.norris.zalan.do',
+          domain: '.zalan.do'
+        },
+        DEVELOPMENT: {
+          url: 'usf-dev.norris.zalan.do',
+          tokenservice: 'https://tm-dev-ext.norris.zalan.do',
+          domain: '.zalan.do'
+        },
+        LOCAL: {
+          url: 'localhost:{PORT}',
+          tokenservice: 'https://tm-dev-ext.norris.zalan.do',
+          domain: 'localhost'
+        }
+      };
+
+      function getSolutionCenterUrl(environment) {
+        var url = environments[environment.name].url;
+        if (environment.name === 'LOCAL') {
+          url = url.replace('{PORT}', environment.port);
+        }
+        return url;
+      }
+
+      function getLoginPath() {
+        return '/login';
+      }
+
+      function getLogoutPath() {
+        return '/logout';
+      }
+
+      function getTokensAPI(environment) {
+        return environments[environment.name].tokenservice + '/tokens';
+      }
+
+      function getDomain(environment) {
+        return environments[environment.name].domain;
+      }
+
+      return {
+        getSolutionCenterUrl: getSolutionCenterUrl,
+        getLoginPath: getLoginPath,
+        getLogoutPath: getLogoutPath,
+        getTokensAPI: getTokensAPI,
+        getDomain: getDomain
+      };
+    }
+  ]);

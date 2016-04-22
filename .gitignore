@@ -1,7 +1,6 @@
 #### Covers build environment for web application
 node_modules/
 bower_components/
-dist/
 npm-debug.log
 test/coverage
 
