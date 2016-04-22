@@ -68,10 +68,6 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   function authenticate(redirectUrl) {
     var token = service.getToken();
 
-    /* TODO
-     Validate redirectUrl is in the same domain!!!
-     */
-
     return validateToken(token)
         .then(
             function () {
@@ -93,7 +89,11 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   function redirectToLogin(redirectUrl) {
-    var redirectionPath = environmentsService.getLoginPath() + "?redirect=" + redirectUrl;
+    var redirectionPath = environmentsService.getLoginPath();
+
+    if (isValidRedirectionUrl(redirectUrl)) {
+      redirectionPath += "?redirect=" + redirectUrl;
+    }
 
     redirect(redirectionPath);
   }
@@ -146,6 +146,12 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     return jwtHelper.decodeToken(token);
   }
 
+  function isValidRedirectionUrl(redirectionUrl) {
+    var domain = environmentsService.getDomain(self.getEnvironment());
+
+    return redirectionUrl.indexOf(domain) !== -1;
+  }
+
   /**
    * Redirects to another URL using different handlers depending whether both origin and target have the same
    * host or not because of problems with the usage of # in URLs together with redirection using $window
@@ -153,7 +159,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function redirect(redirectionPath) {
     redirectionPath = redirectionPath || '/';
-    var redirectionHost = environmentsService.getDomain(self.getEnvironment());
+    var redirectionHost = environmentsService.getSolutionCenterUrl(self.getEnvironment());
 
     if ($window.location.host === redirectionHost) {
       $location.url(redirectionPath);

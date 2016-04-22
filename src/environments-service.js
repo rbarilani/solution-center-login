@@ -3,33 +3,38 @@ angular.module('sc-authentication')
     function () {
       var environments = {
         PRODUCTION: {
-          domain: 'solutions.zalando.com',
-          tokenservice: 'https://token-management.norris.zalan.do'
+          url: 'solutions.zalando.com',
+          tokenservice: 'https://token-management.norris.zalan.do',
+          domain: 'solutions.zalando.com'
         },
         INTEGRATION: {
-          domain: 'usf-integration.norris.zalan.do',
-          tokenservice: 'https://tm-integration.norris.zalan.do'
+          url: 'usf-integration.norris.zalan.do',
+          tokenservice: 'https://tm-integration.norris.zalan.do',
+          domain: '.zalan.do'
         },
         STAGING: {
-          domain: 'usf-stage.norris.zalan.do',
-          tokenservice: 'https://tm-stage.norris.zalan.do'
+          url: 'usf-stage.norris.zalan.do',
+          tokenservice: 'https://tm-stage.norris.zalan.do',
+          domain: '.zalan.do'
         },
         DEVELOPMENT: {
-          domain: 'usf-dev.norris.zalan.do',
-          tokenservice: 'https://tm-dev-ext.norris.zalan.do'
+          url: 'usf-dev.norris.zalan.do',
+          tokenservice: 'https://tm-dev-ext.norris.zalan.do',
+          domain: '.zalan.do'
         },
         LOCAL: {
-          domain: 'localhost:{PORT}',
-          tokenservice: 'https://tm-dev-ext.norris.zalan.do'
+          url: 'localhost:{PORT}',
+          tokenservice: 'https://tm-dev-ext.norris.zalan.do',
+          domain: 'localhost'
         }
       };
 
-      function getDomain(environment) {
-        var domain = environments[environment.name].domain;
+      function getSolutionCenterUrl(environment) {
+        var url = environments[environment.name].url;
         if (environment.name === 'LOCAL') {
-          domain = domain.replace('{PORT}', environment.port);
+          url = url.replace('{PORT}', environment.port);
         }
-        return domain;
+        return url;
       }
 
       function getLoginPath() {
@@ -44,11 +49,16 @@ angular.module('sc-authentication')
         return environments[environment.name].tokenservice + '/tokens';
       }
 
+      function getDomain(environment) {
+        return environments[environment.name].domain;
+      }
+
       return {
-        getDomain: getDomain,
+        getSolutionCenterUrl: getSolutionCenterUrl,
         getLoginPath: getLoginPath,
         getLogoutPath: getLogoutPath,
-        getTokensAPI: getTokensAPI
+        getTokensAPI: getTokensAPI,
+        getDomain: getDomain
       };
     }
   ]);

@@ -5,7 +5,8 @@ describe('authenticationService', function () {
       $httpBackend, jwtHelper, $window;
 
   var mockedToken = 'JWT_TOKEN';
-  var mockedRedirectionUrl = 'REDIRECTION_URL';
+  var mockedDomain = 'domain';
+  var mockedRedirectionUrl = 'app.domain';
   var mockedUser = {id: 1, firstName: 'Chuck', lastName: 'Norris'};
   var mockedTokensAPIEndpoint = 'TOKENS_API';
   var mockedFunction = function() {};
@@ -27,6 +28,7 @@ describe('authenticationService', function () {
           jwtHelper = _jwtHelper_;
           $window = _$window_;
 
+          spyOn(environmentsService, 'getDomain').and.returnValue(mockedDomain);
           spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
           spyOn(jwtHelper, 'decodeToken').and.returnValue(mockedUser);
           spyOn($location, 'url').and.callFake(mockedFunction);
@@ -68,7 +70,7 @@ describe('authenticationService', function () {
       var rejected = false;
 
       spyOn(authenticationService, 'isAuthenticated').and.returnValue(true);
-      spyOn(environmentsService, 'getDomain').and.returnValue($window.location.host);
+      spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue($window.location.host);
 
       authenticationService.redirectToHomeIfAuthenticated()
           .catch(function() {
@@ -186,7 +188,7 @@ describe('authenticationService', function () {
 
   describe('redirectToLogin', function () {
     it('uses $location to redirect if the url to redirect to is in the same domain as the login app', function () {
-      spyOn(environmentsService, 'getDomain').and.returnValue($window.location.host);
+      spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue($window.location.host);
 
       authenticationService.redirectToLogin(mockedRedirectionUrl);
 
@@ -194,7 +196,7 @@ describe('authenticationService', function () {
     });
 
     xit('uses $window to redirect if the url to redirect to is in a different domain than the login app', function () {
-      spyOn(environmentsService, 'getDomain').and.returnValue('DIFFERENT_DOMAIN');
+      spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue('DIFFERENT_DOMAIN');
 
       authenticationService.redirectToLogin(mockedRedirectionUrl);
 
@@ -241,7 +243,7 @@ describe('authenticationService', function () {
 
   describe('logout', function () {
     beforeEach(function() {
-      spyOn(environmentsService, 'getDomain').and.returnValue($window.location.host);
+      spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue($window.location.host);
     });
 
     it('clears the stored credentials', function () {

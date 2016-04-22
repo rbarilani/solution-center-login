@@ -22,57 +22,58 @@ describe('environmentsService', function () {
 
   describe('initial state', function () {
     it('has known state', function () {
-      expect(environmentsService.getDomain).toBeDefined();
+      expect(environmentsService.getSolutionCenterUrl).toBeDefined();
       expect(environmentsService.getLoginPath).toBeDefined();
       expect(environmentsService.getLogoutPath).toBeDefined();
       expect(environmentsService.getTokensAPI).toBeDefined();
+      expect(environmentsService.getDomain).toBeDefined();
     });
   });
 
   /**
-   * getDomain
+   * getSolutionCenterUrl
    */
 
-  describe('getDomain', function () {
-    it('returns the domain for production environment', function () {
+  describe('getSolutionCenterUrl', function () {
+    it('returns the solution center url for production environment', function () {
       mockedEnvironment.name = 'PRODUCTION';
 
-      var domain = environmentsService.getDomain(mockedEnvironment);
+      var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
-      expect(typeof domain).toBe('string');
+      expect(typeof url).toBe('string');
     });
 
-    it('returns the domain for integration environment', function () {
+    it('returns the solution center url for integration environment', function () {
       mockedEnvironment.name = 'INTEGRATION';
 
-      var domain = environmentsService.getDomain(mockedEnvironment);
+      var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
-      expect(typeof domain).toBe('string');
+      expect(typeof url).toBe('string');
     });
 
-    it('returns the domain for staging environment', function () {
+    it('returns the solution center url for staging environment', function () {
       mockedEnvironment.name = 'STAGING';
 
-      var domain = environmentsService.getDomain(mockedEnvironment);
+      var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
-      expect(typeof domain).toBe('string');
+      expect(typeof url).toBe('string');
     });
 
-    it('returns the domain for development environment', function () {
+    it('returns the solution center url for development environment', function () {
       mockedEnvironment.name = 'DEVELOPMENT';
 
-      var domain = environmentsService.getDomain(mockedEnvironment);
+      var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
-      expect(typeof domain).toBe('string');
+      expect(typeof url).toBe('string');
     });
 
-    it('returns the domain for local environment', function () {
+    it('returns the solution center url for local environment', function () {
       mockedEnvironment.name = 'LOCAL';
 
-      var domain = environmentsService.getDomain(mockedEnvironment);
+      var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
-      expect(typeof domain).toBe('string');
-      expect(domain.indexOf(mockedPort)).toBeGreaterThan(-1);
+      expect(typeof url).toBe('string');
+      expect(url.indexOf(mockedPort)).toBeGreaterThan(-1);
     });
   });
 
@@ -150,6 +151,52 @@ describe('environmentsService', function () {
 
       expect(typeof endpoint).toBe('string');
       expect(endpoint.indexOf('/tokens')).toBeGreaterThan(-1);
+    });
+  });
+
+  /**
+   * getDomain
+   */
+
+  describe('getDomain', function () {
+    it('returns the domain for production environment', function () {
+      mockedEnvironment.name = 'PRODUCTION';
+
+      var domain = environmentsService.getDomain(mockedEnvironment);
+
+      expect(typeof domain).toBe('string');
+    });
+
+    it('returns the domain for integration environment', function () {
+      mockedEnvironment.name = 'INTEGRATION';
+
+      var domain = environmentsService.getDomain(mockedEnvironment);
+
+      expect(typeof domain).toBe('string');
+    });
+
+    it('returns the domain for staging environment', function () {
+      mockedEnvironment.name = 'STAGING';
+
+      var domain = environmentsService.getDomain(mockedEnvironment);
+
+      expect(typeof domain).toBe('string');
+    });
+
+    it('returns the domain for development environment', function () {
+      mockedEnvironment.name = 'DEVELOPMENT';
+
+      var domain = environmentsService.getDomain(mockedEnvironment);
+
+      expect(typeof domain).toBe('string');
+    });
+
+    it('returns the domain for local environment', function () {
+      mockedEnvironment.name = 'LOCAL';
+
+      var domain = environmentsService.getDomain(mockedEnvironment);
+
+      expect(typeof domain).toBe('string');
     });
   });
 });
