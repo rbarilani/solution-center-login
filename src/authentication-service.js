@@ -7,17 +7,17 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         port: '3000'
       };
 
+      var solutionCenterCommunication = false;
+
       return {
         /**
-         * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
+         * Configures the environment foAppr appropriate handling or redirections between the different apps within the Solution Center
          * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGING', 'DEVELOPMENT', 'LOCAL'
          * @param port Only important for localhost if using a port diffent than the default one (3000)
          */
         configEnvironment: function (name, port) {
           environment.name = name;
-          if (port) {
-            environment.port = port;
-          }
+          environment.port = port || environment.port;
         },
 
         /**
@@ -28,6 +28,28 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
           return environment;
         },
 
+        /**
+         * Specifies that the communication of the Authentication app is with the Solution Center app for proper
+         * redirection handling
+         * To be used ONLY by the Central Services team
+         * @param isSolutionCenterCommunication
+         */
+        setSolutionCenterCommunication: function (isSolutionCenterCommunication) {
+          solutionCenterCommunication = isSolutionCenterCommunication;
+        },
+
+        /**
+         * Returns true if the communications are performed with the Solution Center app or
+         * false in case they are with the app of a service provider
+         * @returns {boolean}
+         */
+        isSolutionCenterCommunication: function() {
+          return solutionCenterCommunication;
+        },
+
+        /**
+         * Factory implementation
+         */
         $get: [
           '$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location',
           authenticationFactory
@@ -56,14 +78,21 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
 
   ///////////////////////////////////
 
-  // Require that there is an authenticated user
-  // (use this in a route resolve to prevent non-authenticated users from entering that route)
+  /**
+   * Requires the existence of an authenticated user
+   * To be used in a route's resolve method to prevent non-authenticated users from accessing it
+   * @returns {*} A promise since it's the value expected by the resolve method
+   */
   function requireAuthenticatedUser() {
     return service.authenticate($window.location.href);
   }
 
-  // Redirect to home page in case there is a user already authenticated
-  // (use this in the login resolve to prevent users seeing the login dialog when they are already authenticated)
+  /**
+   * Redirects to home page in case there is a user already authenticated
+   * To be used in the login route's resolve method to prevent users seeing the login dialog when they are already
+   * authenticated
+   * @returns {*} A promise since it's the value expected by the resolve method
+   */
   function redirectToHomeIfAuthenticated() {
     if (service.isAuthenticated()) {
       redirect();
@@ -212,19 +241,19 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Redirects to another URL using different handlers depending whether both origin and target have the same
-   * host or not because of problems with the usage of # in URLs together with redirection using $window
-   * @param redirectionPath path to redirect to. It falls back to home page if undefined
+   * Redirects to another URL using different handlers depending whether it is the Solution Center itself ($location) or
+   * a service provider ($window) which is trying to login because of problems with the usage of # in URLs together
+   * with redirection using $window
+   * @param redirectionPath Path to redirect to. It falls back to home page if undefined
    */
   function redirect(redirectionPath) {
     redirectionPath = redirectionPath || '/';
-    var redirectionHost = environmentsService.getSolutionCenterUrl(self.getEnvironment());
 
-    if ($window.location.host === redirectionHost) {
+    if (self.isSolutionCenterCommunication()) {
       $location.url(redirectionPath);
     }
     else {
-      $window.location.href = redirectionHost + "/#" + redirectionPath;
+      $window.location.href = environmentsService.getSolutionCenterUrl(self.getEnvironment()) + "/#" + redirectionPath;
     }
   }
 }
