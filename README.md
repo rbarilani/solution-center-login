@@ -42,6 +42,18 @@ npm install solution-center-login
     ```javascript
     authenticationServiceProvider.configEnvironment('STAGING');
     ```
+    
+The default value is 'LOCAL' and you can also optionally set a port in case you run your application in this environment using a different port than the default one (3000):
+
+    ```javascript
+    authenticationServiceProvider.configEnvironment('LOCAL', 3001);
+    ```    
+    
+4. Due to limitations of redirecting using the $window service, the Solution Center application needs to activate a flag to use a different redirection with using the $location service. The rest of applications can ignore this configuration since it's disabled by default.
+
+    ```javascript
+    authenticationServiceProvider.setSolutionCenterCommunication(true);
+    ```    
 
 ### Develop
 
