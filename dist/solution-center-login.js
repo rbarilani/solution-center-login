@@ -91,7 +91,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @returns {*} A promise since it's the value expected by the resolve method
    */
   function requireAuthenticatedUser() {
-    return service.authenticate($window.location.href);
+    return service.authenticate(encodeURIComponent($window.location.href));
   }
 
   /**
