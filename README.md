@@ -43,7 +43,7 @@ npm install solution-center-login
     authenticationServiceProvider.configEnvironment('STAGING');
     ```
     
-The default value is 'LOCAL' and you can also optionally set a port in case you run your application in this environment using a different port than the default one (3000):
+    The default value is 'LOCAL' and you can also optionally set a port in case you run your application in this environment using a different port than the default one (3000):
 
     ```javascript
     authenticationServiceProvider.configEnvironment('LOCAL', 3001);
