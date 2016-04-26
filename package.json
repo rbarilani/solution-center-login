@@ -3,7 +3,9 @@
   "description": "Authentication service for the Zalando Solution Center",
   "dependencies": {
     "angular": "~1.5.0",
-    "jwt-decode": "^2.0.1"
+    "angular-cookies": "~1.5.0",
+    "ngstorage": "^0.3.10",
+    "angular-jwt": "^0.0.9"
   },
   "devDependencies": {
     "del": "^0.1.3",
