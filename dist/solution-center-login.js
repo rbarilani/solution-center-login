@@ -20,7 +20,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         /**
          * Configures the environment foAppr appropriate handling or redirections between the different apps within the Solution Center
          * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGING', 'DEVELOPMENT', 'LOCAL'
-         * @param port Only important for localhost if using a port diffent than the default one (3000)
+         * @param port Only important for localhost if using a port different than the default one (3000)
          */
         configEnvironment: function (name, port) {
           environment.name = name;
@@ -270,27 +270,27 @@ angular.module('sc-authentication')
     function () {
       var environments = {
         PRODUCTION: {
-          url: 'solutions.zalando.com',
+          url: 'https://www.solutions.zalando.com',
           tokenservice: 'https://token-management.norris.zalan.do',
           domain: 'solutions.zalando.com'
         },
         INTEGRATION: {
-          url: 'usf-integration.norris.zalan.do',
+          url: 'https://usf-integration.norris.zalan.do',
           tokenservice: 'https://tm-integration.norris.zalan.do',
           domain: '.zalan.do'
         },
         STAGING: {
-          url: 'usf-stage.norris.zalan.do',
+          url: 'https://usf-stage.norris.zalan.do',
           tokenservice: 'https://tm-stage.norris.zalan.do',
           domain: '.zalan.do'
         },
         DEVELOPMENT: {
-          url: 'usf-dev.norris.zalan.do',
+          url: 'https://usf-dev.norris.zalan.do',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do',
           domain: '.zalan.do'
         },
         LOCAL: {
-          url: 'localhost:{PORT}',
+          url: 'http://localhost:{PORT}',
           tokenservice: 'https://tm-dev-ext.norris.zalan.do',
           domain: 'localhost'
         }

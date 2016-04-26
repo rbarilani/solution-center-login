@@ -13,7 +13,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         /**
          * Configures the environment foAppr appropriate handling or redirections between the different apps within the Solution Center
          * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGING', 'DEVELOPMENT', 'LOCAL'
-         * @param port Only important for localhost if using a port diffent than the default one (3000)
+         * @param port Only important for localhost if using a port different than the default one (3000)
          */
         configEnvironment: function (name, port) {
           environment.name = name;
