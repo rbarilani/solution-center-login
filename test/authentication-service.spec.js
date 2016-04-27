@@ -27,7 +27,7 @@ describe('authenticationService', function () {
     beforeEach(function () {
       module('sc-authentication', function ($provide, authenticationServiceProvider) {
         $provide.value('$window', {location: {href: mockedOriginUrl}});
-        authenticationServiceProvider.setSolutionCenterCommunication(false);
+        authenticationServiceProvider.setInternalCommunication(false);
         authenticationServiceProvider.configEnvironment('LOCAL', 3000);
       });
 
@@ -320,7 +320,7 @@ describe('authenticationService', function () {
   describe('when communicating with the Solution Center app', function () {
     beforeEach(function () {
       module('sc-authentication', function ($provide, authenticationServiceProvider) {
-        authenticationServiceProvider.setSolutionCenterCommunication(true);
+        authenticationServiceProvider.setInternalCommunication(true);
       });
 
       inject(

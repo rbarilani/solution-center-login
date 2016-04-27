@@ -7,7 +7,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         port: '3000'
       };
 
-      var solutionCenterCommunication = false;
+      var internalCommunication = false;
 
       return {
         /**
@@ -29,22 +29,22 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         },
 
         /**
-         * Specifies that the communication of the Authentication app is with the Solution Center app for proper
+         * Specifies that the Authentication app is hosted in the same domain as the Solution Center app for proper
          * redirection handling
-         * To be used ONLY by the Central Services team
-         * @param isSolutionCenterCommunication
+         * To be used ONLY by the Central Services team and in localhost environments
+         * @param isInternalCommunication
          */
-        setSolutionCenterCommunication: function (isSolutionCenterCommunication) {
-          solutionCenterCommunication = isSolutionCenterCommunication;
+        setInternalCommunication: function (isInternalCommunication) {
+          internalCommunication = isInternalCommunication;
         },
 
         /**
-         * Returns true if the communications are performed with the Solution Center app or
-         * false in case they are with the app of a service provider
+         * Returns true if the Authentication app and the Solution Center app are hosted in the same domain or
+         * false in case they are hosted in different ones (normal case)
          * @returns {boolean}
          */
-        isSolutionCenterCommunication: function() {
-          return solutionCenterCommunication;
+        isInternalCommunication: function() {
+          return internalCommunication;
         },
 
         /**
@@ -249,7 +249,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   function redirect(redirectionPath) {
     redirectionPath = redirectionPath || '/';
 
-    if (self.isSolutionCenterCommunication()) {
+    if (self.isInternalCommunication()) {
       $location.url(redirectionPath);
     }
     else {
