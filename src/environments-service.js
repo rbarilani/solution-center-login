@@ -46,6 +46,9 @@ angular.module('sc-authentication')
       }
 
       function getTokensAPI(environment) {
+        if (environment.name === 'LOCAL') {
+          return environment.tokenService + '/tokens';
+        }
         return environments[environment.name].tokenservice + '/tokens';
       }
 

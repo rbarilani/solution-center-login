@@ -4,25 +4,28 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
 
       var environment = {
         name: 'LOCAL',
-        port: '3000'
+        port: '3000',
+        tokenService: 'https://tm-dev-ext.norris.zalan.do'
       };
 
       var internalCommunication = false;
 
       return {
         /**
-         * Configures the environment foAppr appropriate handling or redirections between the different apps within the Solution Center
-         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGING', 'DEVELOPMENT', 'LOCAL'
-         * @param port Only important for localhost if using a port different than the default one (3000)
+         * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
+         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGING', 'LOCAL'
+         * @param port Only used for development environments (LOCAL) if using a port different than the default one (3000)
+         * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
          */
-        configEnvironment: function (name, port) {
+        configEnvironment: function (name, port, tokenService) {
           environment.name = name;
           environment.port = port || environment.port;
+          environment.tokenService = tokenService || environment.tokenService;
         },
 
         /**
          * Returns the configured environment of the app
-         * @returns {{name: string, port: string}}
+         * @returns {{name: string, port: string, tokenService: string}}
          */
         getEnvironment: function () {
           return environment;
