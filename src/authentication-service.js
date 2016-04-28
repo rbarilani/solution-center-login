@@ -1,82 +1,86 @@
 angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
-    .provider('authenticationService', ['ENVIRONMENTS', function (ENVIRONMENTS) {
-      'use strict';
+  .config(['$localStorageProvider',
+    function ($localStorageProvider) {
+      $localStorageProvider.setKeyPrefix('solutionCenter-');
+    }])
+  .provider('authenticationService', ['ENVIRONMENTS', function (ENVIRONMENTS) {
+    'use strict';
 
-      var environment;
-      var defaultEnvironmentName = 'LOCAL';
+    var environment;
+    var defaultEnvironmentName = 'LOCAL';
 
-      var internalCommunication = false;
+    var internalCommunication = false;
+
+    /**
+     * Helper method to verify whether the selected environment during the configuration phase is valid
+     * @param name
+     * @returns {boolean}
+     */
+    var isValidEnvironment = function (name) {
+      return !!ENVIRONMENTS[name];
+    };
+
+    return {
+      /**
+       * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
+       * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGING', 'LOCAL'
+       * @param port Only used for development environments (LOCAL) if using a port different than the default one (3000)
+       * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
+       */
+      configEnvironment: function (name, port, tokenService) {
+        environment = {};
+        environment.name = isValidEnvironment(name) ? name : defaultEnvironmentName;
+
+        if (environment.name === defaultEnvironmentName) {
+          environment.port = port || ENVIRONMENTS[defaultEnvironmentName].port;
+          environment.tokenService = tokenService || ENVIRONMENTS[defaultEnvironmentName].tokenservice;
+        }
+      },
 
       /**
-       * Helper method to verify whether the selected environment during the configuration phase is valid
-       * @param name
+       * Returns the configured environment of the app
+       * If it was not configured before it sets it to the default environment values (LOCAL)
+       * @returns {{name: string, port: string, tokenService: string}}
+       */
+      getEnvironment: function () {
+        if (!environment) {
+          environment = {
+            name: defaultEnvironmentName,
+            port: ENVIRONMENTS[defaultEnvironmentName].port,
+            tokenService: ENVIRONMENTS[defaultEnvironmentName].tokenservice
+          };
+        }
+        return environment;
+      },
+
+      /**
+       * Specifies that the Authentication app is hosted in the same domain as the Solution Center app for proper
+       * redirection handling
+       * To be used ONLY by the Central Services team and in localhost environments
+       * @param isInternalCommunication
+       */
+      setInternalCommunication: function (isInternalCommunication) {
+        internalCommunication = isInternalCommunication;
+      },
+
+      /**
+       * Returns true if the Authentication app and the Solution Center app are hosted in the same domain or
+       * false in case they are hosted in different ones (normal case)
        * @returns {boolean}
        */
-      var isValidEnvironment = function (name) {
-        return !!ENVIRONMENTS[name];
-      };
+      isInternalCommunication: function () {
+        return internalCommunication;
+      },
 
-      return {
-        /**
-         * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
-         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGING', 'LOCAL'
-         * @param port Only used for development environments (LOCAL) if using a port different than the default one (3000)
-         * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
-         */
-        configEnvironment: function (name, port, tokenService) {
-          environment = {};
-          environment.name = isValidEnvironment(name) ? name : defaultEnvironmentName;
-
-          if (environment.name === defaultEnvironmentName) {
-            environment.port = port || ENVIRONMENTS[defaultEnvironmentName].port;
-            environment.tokenService = tokenService || ENVIRONMENTS[defaultEnvironmentName].tokenservice;
-          }
-        },
-
-        /**
-         * Returns the configured environment of the app
-         * If it was not configured before it sets it to the default environment values (LOCAL)
-         * @returns {{name: string, port: string, tokenService: string}}
-         */
-        getEnvironment: function () {
-          if (!environment) {
-            environment = {
-              name: defaultEnvironmentName,
-              port: ENVIRONMENTS[defaultEnvironmentName].port,
-              tokenService: ENVIRONMENTS[defaultEnvironmentName].tokenservice
-            };
-          }
-          return environment;
-        },
-
-        /**
-         * Specifies that the Authentication app is hosted in the same domain as the Solution Center app for proper
-         * redirection handling
-         * To be used ONLY by the Central Services team and in localhost environments
-         * @param isInternalCommunication
-         */
-        setInternalCommunication: function (isInternalCommunication) {
-          internalCommunication = isInternalCommunication;
-        },
-
-        /**
-         * Returns true if the Authentication app and the Solution Center app are hosted in the same domain or
-         * false in case they are hosted in different ones (normal case)
-         * @returns {boolean}
-         */
-        isInternalCommunication: function () {
-          return internalCommunication;
-        },
-
-        /**
-         * Factory implementation
-         */
-        $get: [
-          '$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location',
-          authenticationFactory
-        ]
-      };
-    }]);
+      /**
+       * Factory implementation
+       */
+      $get: [
+        '$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location',
+        authenticationFactory
+      ]
+    };
+  }]);
 
 function authenticationFactory($q, $localStorage, $cookies, environmentsService, $window, $injector, jwtHelper, $location) {
   'use strict';
@@ -136,23 +140,23 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     var token = service.getToken();
 
     return validateToken(token)
-        .then(
-            function () {
-              return storeCredentials(token);
-            },
-            function (response) {
-              if (response.status === 304) {
-                return storeCredentials(token);
-              }
-              else if (response.status === 409) {
-                var newToken = response.data;
-                return storeCredentials(newToken);
-              }
-              clearCredentials();
-              service.redirectToLogin(redirectUrl);
-              return $q.reject();
-            }
-        );
+      .then(
+        function () {
+          return storeCredentials(token);
+        },
+        function (response) {
+          if (response.status === 304) {
+            return storeCredentials(token);
+          }
+          else if (response.status === 409) {
+            var newToken = response.data;
+            return storeCredentials(newToken);
+          }
+          clearCredentials();
+          service.redirectToLogin(redirectUrl);
+          return $q.reject();
+        }
+      );
   }
 
   /**
@@ -184,7 +188,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @returns {*|null}
    */
   function getToken() {
-    return $localStorage.sc_token || $cookies.get(TOKEN_COOKIE_KEY);
+    return $localStorage.token || $cookies.get(TOKEN_COOKIE_KEY);
   }
 
   /**
@@ -200,7 +204,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @returns {*|null}
    */
   function getUser() {
-    return $localStorage.sc_user;
+    return $localStorage.user;
   }
 
   /*
@@ -213,8 +217,8 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @returns {*|Promise}
    */
   function storeCredentials(token) {
-    $localStorage.sc_token = token;
-    $localStorage.sc_user = getUserFromToken(token);
+    $localStorage.token = token;
+    $localStorage.user = getUserFromToken(token);
 
     return $q.when(token);
   }
@@ -223,8 +227,8 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * Removes the credentials (token and user) from local storage
    */
   function clearCredentials() {
-    $localStorage.sc_token = null;
-    $localStorage.sc_user = null;
+    $localStorage.token = null;
+    $localStorage.user = null;
   }
 
   /**
@@ -238,7 +242,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     }
 
     return $injector.get('$http')
-        .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
+      .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
   }
 
   /**

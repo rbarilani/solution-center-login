@@ -13,6 +13,7 @@ describe('authenticationService', function () {
   var mockedLogoutPath = '/LOGOUT';
   var mockedFunction = function () {
   };
+  var mockedLocalstorage = {};
 
   beforeEach(function () {
     module('sc-authentication', 'angular-jwt', 'ngStorage', 'ngCookies');
@@ -27,6 +28,7 @@ describe('authenticationService', function () {
     beforeEach(function () {
       module('sc-authentication', function ($provide, authenticationServiceProvider) {
         $provide.value('$window', {location: {href: mockedOriginUrl}});
+        $provide.value('$localStorage', mockedLocalstorage);
         authenticationServiceProvider.setInternalCommunication(false);
         authenticationServiceProvider.configEnvironment('LOCAL', 3000);
       });
@@ -118,8 +120,8 @@ describe('authenticationService', function () {
 
     describe('authenticate', function () {
       it('updates the credentials if a new token is issued', function () {
-        $localStorage.sc_token = null;
-        $localStorage.sc_user = null;
+        $localStorage.token = null;
+        $localStorage.user = null;
 
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
         $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(200);
@@ -129,8 +131,8 @@ describe('authenticationService', function () {
         $rootScope.$digest();
 
         expect(!!result.then && typeof result.then === 'function').toBeTruthy();
-        expect($localStorage.sc_token).toBe(mockedToken);
-        expect($localStorage.sc_user).toBe(mockedUser);
+        expect($localStorage.token).toBe(mockedToken);
+        expect($localStorage.user).toBe(mockedUser);
       });
 
       it('updates the credentials if there is a token which is still valid', function () {
@@ -143,8 +145,8 @@ describe('authenticationService', function () {
         $rootScope.$digest();
 
         expect(!!result.then && typeof result.then === 'function').toBeTruthy();
-        expect($localStorage.sc_token).toBe(mockedToken);
-        expect($localStorage.sc_user).toBe(mockedUser);
+        expect($localStorage.token).toBe(mockedToken);
+        expect($localStorage.user).toBe(mockedUser);
       });
 
       it('updates the credentials if there is a token which is still valid but has to be reissued', function () {
@@ -158,14 +160,14 @@ describe('authenticationService', function () {
         $rootScope.$digest();
 
         expect(!!result.then && typeof result.then === 'function').toBeTruthy();
-        expect($localStorage.sc_token).toBe(newToken);
-        expect($localStorage.sc_user).toBe(mockedUser);
+        expect($localStorage.token).toBe(newToken);
+        expect($localStorage.user).toBe(mockedUser);
       });
 
       it('redirects to login if there is a token but it is not valid', function () {
         // Backend returning HTTP 401
-        $localStorage.sc_token = mockedToken;
-        $localStorage.sc_user = mockedUser;
+        $localStorage.token = mockedToken;
+        $localStorage.user = mockedUser;
 
         spyOn(authenticationService, 'redirectToLogin').and.callFake(mockedFunction);
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
@@ -176,14 +178,14 @@ describe('authenticationService', function () {
         $rootScope.$digest();
 
         expect(!!result.then && typeof result.then === 'function').toBeTruthy();
-        expect($localStorage.sc_token).toBe(null);
-        expect($localStorage.sc_user).toBe(null);
+        expect($localStorage.token).toBe(null);
+        expect($localStorage.user).toBe(null);
         expect(authenticationService.redirectToLogin).toHaveBeenCalledWith(mockedRedirectionUrl);
       });
 
       it('redirects to login if there is no token', function () {
-        $localStorage.sc_token = null;
-        $localStorage.sc_user = null;
+        $localStorage.token = null;
+        $localStorage.user = null;
 
         spyOn(authenticationService, 'redirectToLogin').and.callFake(mockedFunction);
         spyOn(authenticationService, 'getToken').and.returnValue(undefined);
@@ -191,8 +193,8 @@ describe('authenticationService', function () {
         authenticationService.authenticate(mockedRedirectionUrl);
         $rootScope.$digest();
 
-        expect($localStorage.sc_token).toBe(null);
-        expect($localStorage.sc_user).toBe(null);
+        expect($localStorage.token).toBe(null);
+        expect($localStorage.user).toBe(null);
         expect(authenticationService.redirectToLogin).toHaveBeenCalledWith(mockedRedirectionUrl);
       });
     });
@@ -219,27 +221,27 @@ describe('authenticationService', function () {
 
     describe('getToken', function () {
       it('returns the token if it is stored in local storage', function () {
-        $localStorage.sc_token = mockedToken;
+        $localStorage.token = mockedToken;
 
         expect(authenticationService.getToken()).toEqual(mockedToken);
       });
 
       it('returns the token if it is stored in the cookie', function () {
-        $localStorage.sc_token = null;
+        $localStorage.token = null;
         spyOn($cookies, 'get').and.returnValue(mockedToken);
 
         expect(authenticationService.getToken()).toEqual(mockedToken);
       });
 
       it('returns the token if it is stored both in local storage and cookie', function () {
-        $localStorage.sc_token = mockedToken;
+        $localStorage.token = mockedToken;
         spyOn($cookies, 'get').and.returnValue(mockedToken);
 
         expect(authenticationService.getToken()).toEqual(mockedToken);
       });
 
       it('returns null if there is no token stored in either local storage or cookie', function () {
-        $localStorage.sc_user = null;
+        $localStorage.user = null;
         spyOn($cookies, 'get').and.returnValue(null);
 
         expect(authenticationService.getUser()).toEqual(null);
@@ -256,13 +258,13 @@ describe('authenticationService', function () {
       });
 
       it('clears the stored credentials', function () {
-        $localStorage.sc_token = mockedToken;
-        $localStorage.sc_user = mockedUser;
+        $localStorage.token = mockedToken;
+        $localStorage.user = mockedUser;
 
         authenticationService.logout();
 
-        expect($localStorage.sc_token).toBe(null);
-        expect($localStorage.sc_user).toBe(null);
+        expect($localStorage.token).toBe(null);
+        expect($localStorage.user).toBe(null);
       });
 
       it('redirects to logout page using the $window service', function () {
@@ -281,13 +283,13 @@ describe('authenticationService', function () {
      */
     describe('isAuthenticated', function () {
       it('returns true if there is an authenticated user', function () {
-        $localStorage.sc_user = mockedUser;
+        $localStorage.user = mockedUser;
 
         expect(authenticationService.isAuthenticated()).toBeTruthy();
       });
 
       it('returns true if there is no authenticated user', function () {
-        $localStorage.sc_user = null;
+        $localStorage.user = null;
 
         expect(authenticationService.isAuthenticated()).toBeFalsy();
       });
@@ -299,13 +301,13 @@ describe('authenticationService', function () {
 
     describe('getUser', function () {
       it('returns the user if there is one logged in', function () {
-        $localStorage.sc_user = mockedUser;
+        $localStorage.user = mockedUser;
 
         expect(authenticationService.getUser()).toEqual(mockedUser);
       });
 
       it('returns null if there is no user logged in', function () {
-        $localStorage.sc_user = null;
+        $localStorage.user = null;
 
         expect(authenticationService.getUser()).toEqual(null);
       });
