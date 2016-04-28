@@ -1,14 +1,20 @@
 angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
-    .provider('authenticationService', [function () {
+    .provider('authenticationService', ['ENVIRONMENTS', function (ENVIRONMENTS) {
       'use strict';
 
-      var environment = {
-        name: 'LOCAL',
-        port: '3000',
-        tokenService: 'https://tm-dev-ext.norris.zalan.do'
-      };
+      var environment;
+      var defaultEnvironmentName = 'LOCAL';
 
       var internalCommunication = false;
+
+      /**
+       * Helper method to verify whether the selected environment during the configuration phase is valid
+       * @param name
+       * @returns {boolean}
+       */
+      var isValidEnvironment = function (name) {
+        return !!ENVIRONMENTS[name];
+      };
 
       return {
         /**
@@ -18,16 +24,28 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
          * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
          */
         configEnvironment: function (name, port, tokenService) {
-          environment.name = name;
-          environment.port = port || environment.port;
-          environment.tokenService = tokenService || environment.tokenService;
+          environment = {};
+          environment.name = isValidEnvironment(name) ? name : defaultEnvironmentName;
+
+          if (environment.name === defaultEnvironmentName) {
+            environment.port = port || ENVIRONMENTS[defaultEnvironmentName].port;
+            environment.tokenService = tokenService || ENVIRONMENTS[defaultEnvironmentName].tokenservice;
+          }
         },
 
         /**
          * Returns the configured environment of the app
+         * If it was not configured before it sets it to the default environment values (LOCAL)
          * @returns {{name: string, port: string, tokenService: string}}
          */
         getEnvironment: function () {
+          if (!environment) {
+            environment = {
+              name: defaultEnvironmentName,
+              port: ENVIRONMENTS[defaultEnvironmentName].port,
+              tokenService: ENVIRONMENTS[defaultEnvironmentName].tokenservice
+            };
+          }
           return environment;
         },
 
@@ -46,7 +64,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
          * false in case they are hosted in different ones (normal case)
          * @returns {boolean}
          */
-        isInternalCommunication: function() {
+        isInternalCommunication: function () {
           return internalCommunication;
         },
 
