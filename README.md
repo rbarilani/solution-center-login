@@ -73,14 +73,14 @@ npm install solution-center-login
 
 ### Develop
 
-Clone the repository, then run:
+1. Clone the repository, then run:
 
 ```shell
 bower install
 npm install
 ```
 
-Install Gulp via npm if you don't have it already:
+2. Install Gulp via npm if you don't have it already:
 
 ```shell
 npm install -g gulp
@@ -91,6 +91,10 @@ npm install -g gulp
 * `gulp build`: build the project and make new files in `dist`
 * `gulp serve`: start a server to serve the demo page and launch a browser then watches for changes in `src` files to reload the page
 * `gulp test`: run unit tests
+
+3. At this point, for local development you have two options:
+    - either running the Solution Center app locally (see instructions for it in its README file)
+    - or simulating the behaviour of the Solution Center app inside your own one, intercepting the login route and mocking its actual authentication through the User Service, bypassing the Solution Center app
 
 ### License
 MIT
