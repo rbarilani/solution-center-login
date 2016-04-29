@@ -10,7 +10,7 @@ describe('authenticationService', function () {
   var mockedOriginUrl = 'ORIGIN';
   var mockedUser = {id: 1, firstName: 'Chuck', lastName: 'Norris'};
   var mockedTokensAPIEndpoint = 'TOKENS_API';
-  var mockedLogoutPath = '/LOGOUT';
+  var mockedLoginPath = '/LOGIN';
   var mockedFunction = function () {
   };
   var mockedLocalstorage = {};
@@ -57,7 +57,7 @@ describe('authenticationService', function () {
         expect(authenticationService.requireAuthenticatedUser).toBeDefined();
         expect(authenticationService.redirectToHomeIfAuthenticated).toBeDefined();
         expect(authenticationService.authenticate).toBeDefined();
-        expect(authenticationService.redirectToLogin).toBeDefined();
+        expect(authenticationService.redirectToLoginWithRedirectionParameter).toBeDefined();
         expect(authenticationService.getToken).toBeDefined();
         expect(authenticationService.logout).toBeDefined();
         expect(authenticationService.getUser).toBeDefined();
@@ -180,7 +180,7 @@ describe('authenticationService', function () {
         expect(!!result.then && typeof result.then === 'function').toBeTruthy();
         expect($localStorage.token).toBe(null);
         expect($localStorage.user).toBe(null);
-        expect(authenticationService.redirectToLogin).toHaveBeenCalledWith(mockedRedirectionUrl);
+        expect(authenticationService.redirectToLoginWithRedirectionParameter).toHaveBeenCalledWith(mockedRedirectionUrl);
       });
 
       it('redirects to login if there is no token', function () {
@@ -195,7 +195,7 @@ describe('authenticationService', function () {
 
         expect($localStorage.token).toBe(null);
         expect($localStorage.user).toBe(null);
-        expect(authenticationService.redirectToLogin).toHaveBeenCalledWith(mockedRedirectionUrl);
+        expect(authenticationService.redirectToLoginWithRedirectionParameter).toHaveBeenCalledWith(mockedRedirectionUrl);
       });
     });
 
@@ -209,7 +209,7 @@ describe('authenticationService', function () {
 
         expect($window.location.href).toEqual(mockedOriginUrl);
 
-        authenticationService.redirectToLogin(mockedRedirectionUrl);
+        authenticationService.redirectToLoginWithRedirectionParameter(mockedRedirectionUrl);
 
         expect($window.location.href).not.toEqual(mockedOriginUrl);
       });
@@ -252,9 +252,15 @@ describe('authenticationService', function () {
      * logout
      */
 
-    describe('logout', function () {
+    fdescribe('logout', function () {
       beforeEach(function () {
         spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue($window.location.host);
+      });
+
+      it('invalidates the token', function() {
+        $httpBackend.expectDELETE(mockedTokensAPIEndpoint).respond(200);
+
+        authenticationService.logout();
       });
 
       it('clears the stored credentials', function () {
@@ -267,8 +273,8 @@ describe('authenticationService', function () {
         expect($localStorage.user).toBe(null);
       });
 
-      it('redirects to logout page using the $window service', function () {
-        spyOn(environmentsService, 'getLogoutPath').and.returnValue(mockedLogoutPath);
+      it('redirects to login page using the $window service', function () {
+        spyOn(environmentsService, 'getLoginPath').and.returnValue(mockedLoginPath);
 
         expect($window.location.href).toEqual(mockedOriginUrl);
 
@@ -343,7 +349,7 @@ describe('authenticationService', function () {
 
     describe('redirectToLogin', function () {
       it('uses $location service to do redirections', function () {
-        authenticationService.redirectToLogin(mockedRedirectionUrl);
+        authenticationService.redirectToLoginWithRedirectionParameter(mockedRedirectionUrl);
 
         expect($location.url).toHaveBeenCalledWith("/login?redirect=" + mockedRedirectionUrl);
       });
