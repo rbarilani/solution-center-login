@@ -325,17 +325,20 @@ describe('authenticationService', function () {
     beforeEach(function () {
       module('sc-authentication', function ($provide, authenticationServiceProvider) {
         authenticationServiceProvider.setInternalCommunication(true);
+        authenticationServiceProvider.configEnvironment('LOCAL');
       });
 
       inject(
-          function (_$rootScope_, _authenticationService_, _environmentsService_, _$location_) {
+          function (_$rootScope_, _authenticationService_, _environmentsService_, _$location_, _$httpBackend_) {
             $rootScope = _$rootScope_;
             authenticationService = _authenticationService_;
             environmentsService = _environmentsService_;
             $location = _$location_;
+            $httpBackend = _$httpBackend_;
 
             spyOn(environmentsService, 'getDomain').and.returnValue(mockedDomain);
-            spyOn($location, 'url').and.callFake(mockedFunction);
+            spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
+            spyOn($location, 'url');
           });
     });
 
@@ -345,10 +348,13 @@ describe('authenticationService', function () {
 
     describe('logout', function () {
       it('redirects to logout page using the $location service', function () {
+        $httpBackend.expectDELETE(mockedTokensAPIEndpoint).respond(200);
         spyOn(environmentsService, 'getLoginPath').and.returnValue(mockedLoginPath);
 
         authenticationService.logout();
+        $httpBackend.flush();
 
+        expect(environmentsService.getLoginPath).toHaveBeenCalled();
         expect($location.url).toHaveBeenCalledWith(mockedLoginPath);
       });
     });
