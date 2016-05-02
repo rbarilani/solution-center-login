@@ -345,11 +345,11 @@ describe('authenticationService', function () {
 
     describe('logout', function () {
       it('redirects to logout page using the $location service', function () {
-        spyOn(environmentsService, 'getLogoutPath').and.returnValue(mockedLogoutPath);
+        spyOn(environmentsService, 'getLoginPath').and.returnValue(mockedLoginPath);
 
         authenticationService.logout();
 
-        expect($location.url).toHaveBeenCalledWith(mockedLogoutPath);
+        expect($location.url).toHaveBeenCalledWith(mockedLoginPath);
       });
     });
   });

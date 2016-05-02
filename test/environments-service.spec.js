@@ -51,8 +51,8 @@ describe('environmentsService', function () {
       expect(typeof url).toBe('string');
     });
 
-    it('returns the solution center url for staging environment', function () {
-      mockedEnvironment.name = 'STAGING';
+    it('returns the solution center url for stage environment', function () {
+      mockedEnvironment.name = 'STAGE';
 
       var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
@@ -126,8 +126,8 @@ describe('environmentsService', function () {
       expect(endpoint.indexOf('/tokens')).toBeGreaterThan(-1);
     });
 
-    it('returns the token API endpoint for staging environment', function () {
-      mockedEnvironment.name = 'STAGING';
+    it('returns the token API endpoint for stage environment', function () {
+      mockedEnvironment.name = 'STAGE';
 
       var endpoint = environmentsService.getTokensAPI(mockedEnvironment);
 
@@ -175,8 +175,8 @@ describe('environmentsService', function () {
       expect(typeof domain).toBe('string');
     });
 
-    it('returns the domain for staging environment', function () {
-      mockedEnvironment.name = 'STAGING';
+    it('returns the domain for stage environment', function () {
+      mockedEnvironment.name = 'STAGE';
 
       var domain = environmentsService.getDomain(mockedEnvironment);
 
