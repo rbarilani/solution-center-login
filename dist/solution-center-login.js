@@ -182,7 +182,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
         })
         .finally(function() {
           service.clearCredentials();
-          redirect();
+          redirect(environmentsService.getLoginPath());
         });
   }
 
