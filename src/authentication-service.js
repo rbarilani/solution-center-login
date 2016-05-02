@@ -166,21 +166,6 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Redirects to the login page of the Solution Center specifying a parameter pointing to the URL where the user should
-   * be redirected after authenticating
-   * @param redirectUrl URL from the specific app where to redirect back after the authentication
-   */
-  function login(redirectUrl) {
-    var redirectionPath = environmentsService.getLoginPath();
-
-    if (isValidRedirectionUrl(redirectUrl)) {
-      redirectionPath += "?redirect=" + redirectUrl;
-    }
-
-    redirect(redirectionPath);
-  }
-
-  /**
    * Removes the user credentials from the storage and redirects to the login page of the Solution Center
    */
   function logout() {
@@ -263,6 +248,21 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   /*
    PRIVATE METHODS
    */
+
+  /**
+   * Redirects to the login page of the Solution Center specifying a parameter pointing to the URL where the user should
+   * be redirected after authenticating
+   * @param redirectUrl URL from the specific app where to redirect back after the authentication
+   */
+  function login(redirectUrl) {
+    var redirectionPath = environmentsService.getLoginPath();
+
+    if (isValidRedirectionUrl(redirectUrl)) {
+      redirectionPath += "?redirect=" + redirectUrl;
+    }
+
+    redirect(redirectionPath);
+  }
 
   /**
    * Saves the credentials (token, user and brand) in local storage
