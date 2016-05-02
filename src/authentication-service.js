@@ -23,7 +23,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
       return {
         /**
          * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
-         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGING', 'LOCAL'
+         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGE', 'LOCAL'
          * @param port Only used for development environments (LOCAL) if using a port different than the default one (3000)
          * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
          */
@@ -159,10 +159,25 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
                 return storeCredentials(newToken);
               }
               service.clearCredentials();
-              redirectToLoginWithRedirectionParameter(redirectUrl);
+              login(redirectUrl);
               return $q.reject();
             }
         );
+  }
+
+  /**
+   * Redirects to the login page of the Solution Center specifying a parameter pointing to the URL where the user should
+   * be redirected after authenticating
+   * @param redirectUrl URL from the specific app where to redirect back after the authentication
+   */
+  function login(redirectUrl) {
+    var redirectionPath = environmentsService.getLoginPath();
+
+    if (isValidRedirectionUrl(redirectUrl)) {
+      redirectionPath += "?redirect=" + redirectUrl;
+    }
+
+    redirect(redirectionPath);
   }
 
   /**
@@ -324,21 +339,6 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function getUserFromToken(token) {
     return jwtHelper.decodeToken(token);
-  }
-
-  /**
-   * Redirects to the login page of the Solution Center specifying a parameter pointing to the URL where the user should
-   * be redirected after authenticating
-   * @param redirectUrl URL from the specific app where to redirect back after the authentication
-   */
-  function redirectToLoginWithRedirectionParameter(redirectUrl) {
-    var redirectionPath = environmentsService.getLoginPath();
-
-    if (isValidRedirectionUrl(redirectUrl)) {
-      redirectionPath += "?redirect=" + redirectUrl;
-    }
-
-    redirect(redirectionPath);
   }
 
   /**

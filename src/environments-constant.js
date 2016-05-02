@@ -10,7 +10,7 @@ angular.module('sc-authentication')
         tokenservice: 'https://tm-integration.norris.zalan.do',
         domain: '.zalan.do'
       },
-      STAGING: {
+      STAGE: {
         url: 'https://usf-stage.norris.zalan.do',
         tokenservice: 'https://tm-stage.norris.zalan.do',
         domain: '.zalan.do'
