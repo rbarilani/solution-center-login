@@ -11,6 +11,7 @@ describe('authenticationService', function () {
   var mockedUser = {id: 1, firstName: 'Chuck', lastName: 'Norris'};
   var mockedTokensAPIEndpoint = 'TOKENS_API';
   var mockedLoginPath = '/LOGIN';
+  var mockedBrandId = 1;
   var mockedFunction = function () {
   };
   var mockedLocalstorage = {};
@@ -312,6 +313,38 @@ describe('authenticationService', function () {
         $localStorage.user = null;
 
         expect(authenticationService.getUser()).toEqual(null);
+      });
+    });
+
+    /**
+     * getBrand
+     */
+
+    describe('getBrand', function () {
+      it('returns a brand if the user has accessed it', function () {
+        $localStorage.brand = mockedBrandId;
+
+        expect(authenticationService.getBrand()).toEqual(mockedBrandId);
+      });
+
+      it('returns null if there user has not accessed any brand', function () {
+        $localStorage.brand = null;
+
+        expect(authenticationService.getBrand()).toEqual(null);
+      });
+    });
+
+    /**
+     * changeBrand
+     */
+
+    describe('changeBrand', function () {
+      it('sets a brand in the storage', function () {
+        $localStorage.brand = null;
+
+        authenticationService.changeBrand(mockedBrandId);
+
+        expect($localStorage.brand).toEqual(mockedBrandId);
       });
     });
   });
