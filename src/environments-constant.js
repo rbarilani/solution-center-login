@@ -6,17 +6,17 @@ angular.module('sc-authentication')
         domain: 'solutions.zalando.com'
       },
       INTEGRATION: {
-        url: 'https://usf-integration.norris.zalan.do',
+        url: 'https://sc-integration.norris.zalan.do',
         tokenservice: 'https://tm-integration.norris.zalan.do',
         domain: '.zalan.do'
       },
       STAGE: {
-        url: 'https://usf-stage.norris.zalan.do',
+        url: 'https://sc-stage.norris.zalan.do',
         tokenservice: 'https://tm-stage.norris.zalan.do',
         domain: '.zalan.do'
       },
       DEVELOPMENT: {
-        url: 'https://usf-dev.norris.zalan.do',
+        url: 'https://sc-dev.norris.zalan.do',
         tokenservice: 'https://tm-dev-ext.norris.zalan.do',
         domain: '.zalan.do'
       },
