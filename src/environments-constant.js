@@ -16,7 +16,7 @@ angular.module('sc-authentication')
         domain: '.zalan.do'
       },
       DEVELOPMENT: {
-        url: 'https://sc-dev.norris.zalan.do',
+        url: 'https://sc-development.norris.zalan.do',
         tokenservice: 'https://tm-dev-ext.norris.zalan.do',
         domain: '.zalan.do'
       },
