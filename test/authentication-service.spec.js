@@ -70,9 +70,16 @@ describe('authenticationService', function () {
         expect(authenticationService.requireAuthenticatedUser).toBeDefined();
         expect(authenticationService.redirectToHomeIfAuthenticated).toBeDefined();
         expect(authenticationService.authenticate).toBeDefined();
-        expect(authenticationService.getToken).toBeDefined();
         expect(authenticationService.logout).toBeDefined();
+        expect(authenticationService.silentLogout).toBeDefined();
+        expect(authenticationService.setToken).toBeDefined();
+        expect(authenticationService.getToken).toBeDefined();
+        expect(authenticationService.isAuthenticated).toBeDefined();
         expect(authenticationService.getUser).toBeDefined();
+        expect(authenticationService.getBrand).toBeDefined();
+        expect(authenticationService.changeBrand).toBeDefined();
+        expect(authenticationService.clearCredentials).toBeDefined();
+        expect(authenticationService.clearBrand).toBeDefined();
       });
     });
 
@@ -282,6 +289,39 @@ describe('authenticationService', function () {
     });
 
     /**
+     * silentLogout
+     */
+
+    describe('silentLogout', function () {
+      it('invalidates the token', function() {
+        $httpBackend.expectDELETE(mockedTokensAPIEndpoint).respond(200);
+
+        authenticationService.silentLogout();
+        $httpBackend.flush();
+      });
+
+      it('clears the stored credentials', function () {
+        $httpBackend.expectDELETE(mockedTokensAPIEndpoint).respond(200);
+        spyOn(authenticationService, 'clearCredentials');
+
+        authenticationService.silentLogout();
+        $httpBackend.flush();
+
+        expect(authenticationService.clearCredentials).toHaveBeenCalled();
+      });
+
+      it('does not perform any redirection', function () {
+        $httpBackend.expectDELETE(mockedTokensAPIEndpoint).respond(200);
+        expect($window.location.href).toBe(mockedOriginUrl);
+
+        authenticationService.silentLogout();
+        $httpBackend.flush();
+
+        expect($window.location.href).toBe(mockedOriginUrl);
+      });
+    });
+
+    /**
      * isAuthenticated
      */
     describe('isAuthenticated', function () {
@@ -358,7 +398,7 @@ describe('authenticationService', function () {
     beforeEach(function () {
       module('sc-authentication', function ($provide, authenticationServiceProvider) {
         authenticationServiceProvider.setInternalCommunication(true);
-        authenticationServiceProvider.configEnvironment('LOCAL');
+        // Skip the configuration of the environment to test that it falls back to the default values as expected
       });
 
       inject(

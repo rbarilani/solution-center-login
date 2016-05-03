@@ -95,6 +95,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     redirectToHomeIfAuthenticated: redirectToHomeIfAuthenticated,
     authenticate: authenticate,
     logout: logout,
+    silentLogout: silentLogout,
     setToken: setToken,
     getToken: getToken,
     isAuthenticated: isAuthenticated,
@@ -170,12 +171,25 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function logout() {
     invalidateToken(getToken())
-        .catch(function() {
+        .catch(function () {
           // TODO Log error
         })
-        .finally(function() {
+        .finally(function () {
           service.clearCredentials();
           redirect(environmentsService.getLoginPath());
+        });
+  }
+
+  /**
+   * Removes the user credentials from the storage and logs the user out without redirecting anywhere
+   */
+  function silentLogout() {
+    invalidateToken(getToken())
+        .catch(function () {
+          // TODO Log error
+        })
+        .finally(function () {
+          service.clearCredentials();
         });
   }
 
@@ -329,7 +343,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function invalidateToken(token) {
     return $injector.get('$http')
-        .delete(environmentsService.getTokensAPI(self.getEnvironment()), { headers: {'Authorization': token} });
+        .delete(environmentsService.getTokensAPI(self.getEnvironment()), {headers: {'Authorization': token}});
   }
 
   /**
