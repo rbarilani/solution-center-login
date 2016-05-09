@@ -26,7 +26,7 @@ angular.module('sc-authentication')
       },
       LOCAL: {
         url: 'http://localhost:{PORT}',
-        port: 3000,
+        port: 3333,
         tokenservice: 'https://tm-development.norris.zalan.do',
         userservice: 'https://um-development.norris.zalan.do',
         domain: 'localhost'

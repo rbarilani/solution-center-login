@@ -31,7 +31,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
         /**
          * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
          * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGE', 'LOCAL'
-         * @param port Only used for development environments (LOCAL) if using a port different than the default one (3000)
+         * @param port Only used for development environments (LOCAL) if using a port different than the default one (3333)
          * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
          */
         configEnvironment: function (name, port, tokenService) {
@@ -423,7 +423,7 @@ angular.module('sc-authentication')
       },
       LOCAL: {
         url: 'http://localhost:{PORT}',
-        port: 3000,
+        port: 3333,
         tokenservice: 'https://tm-development.norris.zalan.do',
         userservice: 'https://um-development.norris.zalan.do',
         domain: 'localhost'

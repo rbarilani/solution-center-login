@@ -44,7 +44,7 @@ npm install solution-center-login
     ```
     
     The default value is 'LOCAL' and you can also optionally set:
-    - A port in case you run your application in this environment using a different port than the default one (3000)
+    - A port in case you run your application in this environment using a different port than the default one (3333)
     - An endpoint for the Token Service in case you want to mock it instead of using the default one ('https://tm-development.norris.zalan.do')
 
     ```javascript
