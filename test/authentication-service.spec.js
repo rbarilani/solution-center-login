@@ -2,7 +2,7 @@ describe('authenticationService', function () {
   'use strict';
 
   var $rootScope, authenticationService, $q, $localStorage, $cookies, environmentsService, $location,
-      $httpBackend, jwtHelper, $window;
+      $httpBackend, jwtHelper, $window, $timeout;
 
   var mockedToken = 'JWT_TOKEN';
   var mockedDomain = 'domain';
@@ -17,7 +17,6 @@ describe('authenticationService', function () {
   var mockedLocalstorage = {};
   var mockedCookieService = jasmine.createSpyObj('mockedCookieService', ['get', 'put', 'remove']);
   var TOKEN_COOKIE_KEY = "SC_TOKEN";
-  var BRAND_COOKIE_KEY = "SC_BRAND";
   var resolved = false;
   var success = function () { resolved = true; };
   var failure = function () { resolved = false; };
@@ -402,12 +401,13 @@ describe('authenticationService', function () {
       });
 
       inject(
-          function (_$rootScope_, _authenticationService_, _environmentsService_, _$location_, _$httpBackend_) {
+          function (_$rootScope_, _authenticationService_, _environmentsService_, _$location_, _$httpBackend_, _$timeout_) {
             $rootScope = _$rootScope_;
             authenticationService = _authenticationService_;
             environmentsService = _environmentsService_;
             $location = _$location_;
             $httpBackend = _$httpBackend_;
+            $timeout = _$timeout_;
 
             spyOn(environmentsService, 'getDomain').and.returnValue(mockedDomain);
             spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
@@ -426,9 +426,11 @@ describe('authenticationService', function () {
 
         authenticationService.logout();
         $httpBackend.flush();
+        $timeout.flush();
 
         expect(environmentsService.getLoginPath).toHaveBeenCalled();
         expect($location.url).toHaveBeenCalledWith(mockedLoginPath);
+        $timeout.verifyNoPendingTasks();
       });
     });
   });

@@ -83,13 +83,13 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
          * Factory implementation
          */
         $get: [
-          '$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location',
+          '$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location', '$timeout',
           authenticationFactory
         ]
       };
     }]);
 
-function authenticationFactory($q, $localStorage, $cookies, environmentsService, $window, $injector, jwtHelper, $location) {
+function authenticationFactory($q, $localStorage, $cookies, environmentsService, $window, $injector, jwtHelper, $location, $timeout) {
   'use strict';
 
   var self = this;
@@ -385,7 +385,9 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     redirectionPath = redirectionPath || '/';
 
     if (self.isInternalCommunication()) {
-      $location.url(redirectionPath);
+      $timeout(function() {
+        $location.url(redirectionPath);
+      });
     }
     else {
       $window.location.href = environmentsService.getSolutionCenterUrl(self.getEnvironment()) + "/#" + redirectionPath;
