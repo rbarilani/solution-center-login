@@ -207,7 +207,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @param password
    */
   function silentLogin(email, password) {
-    service.login(email, password)
+    return service.login(email, password)
         .then(
             function (token) {
               storeCredentials(token);
@@ -223,13 +223,14 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * Removes the user credentials from the storage and redirects to the login page of the Solution Center
    */
   function logout() {
-    invalidateToken(getToken())
+    return invalidateToken(getToken())
         .catch(function () {
           // TODO Log error
         })
         .finally(function () {
           service.clearCredentials();
           redirect(environmentsService.getLoginPath());
+          return $q.when();
         });
   }
 
@@ -237,12 +238,13 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * Removes the user credentials from the storage and logs the user out without redirecting anywhere
    */
   function silentLogout() {
-    invalidateToken(getToken())
+    return invalidateToken(getToken())
         .catch(function () {
           // TODO Log error
         })
         .finally(function () {
           service.clearCredentials();
+          return $q.when();
         });
   }
 
