@@ -57,6 +57,7 @@ describe('authenticationService', function () {
             spyOn(environmentsService, 'getDomain').and.returnValue(mockedDomain);
             spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
             spyOn(jwtHelper, 'decodeToken').and.returnValue(mockedUser);
+            spyOn(authenticationService, 'setToken').and.callThrough();
           });
     });
 
@@ -75,6 +76,7 @@ describe('authenticationService', function () {
         expect(authenticationService.logout).toBeDefined();
         expect(authenticationService.silentLogout).toBeDefined();
         expect(authenticationService.getToken).toBeDefined();
+        expect(authenticationService.setToken).toBeDefined();
         expect(authenticationService.isAuthenticated).toBeDefined();
         expect(authenticationService.getUser).toBeDefined();
         expect(authenticationService.getBrand).toBeDefined();
@@ -242,25 +244,23 @@ describe('authenticationService', function () {
       });
 
       it('sets the token in the storage if the credentials provided are valid to log in', function () {
-        $localStorage.token = undefined;
         $httpBackend.expectPOST(mockedTokensAPIEndpoint).respond(200, mockedToken);
 
         authenticationService.login(anyString, anyString).then(success, failure);
         $httpBackend.flush();
         $rootScope.$digest();
 
-        expect(authenticationService.getToken()).toEqual(mockedToken);
+        expect(authenticationService.setToken).toHaveBeenCalled();
       });
 
       it('does not set any token in the storage if the credentials are invalid', function () {
-        $localStorage.token = undefined;
         $httpBackend.expectPOST(mockedTokensAPIEndpoint).respond(401);
 
         authenticationService.login(anyString, anyString).then(success, failure);
         $httpBackend.flush();
         $rootScope.$digest();
 
-        expect(authenticationService.getToken()).toEqual(undefined);
+        expect(authenticationService.setToken).not.toHaveBeenCalled();
       });
     });
 

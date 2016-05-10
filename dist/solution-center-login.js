@@ -106,6 +106,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     logout: logout,
     silentLogout: silentLogout,
     getToken: getToken,
+    setToken: setToken,
     isAuthenticated: isAuthenticated,
     getUser: getUser,
     getBrand: getBrand,
@@ -191,7 +192,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
             })
         .then(
             function (response) {
-              setToken(response.data);
+              service.setToken(response.data);
               return $q.when(response.data);
             },
             function () {
@@ -251,6 +252,15 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function getToken() {
     return $localStorage.token || $cookies.get(TOKEN_COOKIE_KEY);
+  }
+
+  /**
+   * Saves the token in the local storage and in the cookie
+   * @param token
+   */
+  function setToken(token) {
+    $localStorage.token = token;
+    $cookies.put(TOKEN_COOKIE_KEY, token);
   }
 
   /**
@@ -327,19 +337,10 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @returns {*|Promise}
    */
   function storeCredentials(token) {
-    setToken(token);
+    service.setToken(token);
     setUser(getUserFromToken(token));
 
     return $q.when(token);
-  }
-
-  /**
-   * Saves the token in the local storage and in the cookie
-   * @param token
-   */
-  function setToken(token) {
-    $localStorage.token = token;
-    $cookies.put(TOKEN_COOKIE_KEY, token);
   }
 
   /**
