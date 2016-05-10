@@ -94,9 +94,10 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     requireAuthenticatedUser: requireAuthenticatedUser,
     redirectToHomeIfAuthenticated: redirectToHomeIfAuthenticated,
     authenticate: authenticate,
+    login: login,
+    silentLogin: silentLogin,
     logout: logout,
     silentLogout: silentLogout,
-    setToken: setToken,
     getToken: getToken,
     isAuthenticated: isAuthenticated,
     getUser: getUser,
@@ -160,7 +161,51 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
                 return storeCredentials(newToken);
               }
               service.clearCredentials();
-              login(redirectUrl);
+              redirectToLogin(redirectUrl);
+              return $q.reject();
+            }
+        );
+  }
+
+  /**
+   * Attempts to login an user by its email and password
+   * If it is successful it sets the token returned by the backend into the storage
+   * @param email
+   * @param password
+   * @returns {Function} A resolved promise with the token in case the user could be logged in or a rejected one in any other case
+   */
+  function login(email, password) {
+    return $injector.get('$http')
+        .post(
+            environmentsService.getTokensAPI(self.getEnvironment()),
+            {
+              email: email,
+              password: password
+            })
+        .then(
+            function (response) {
+              setToken(response.data);
+              return $q.when(response.data);
+            },
+            function () {
+              return $q.reject("Wrong credentials");
+            });
+  }
+
+  /**
+   * Performs a silent login without any redirection between apps and sets all the credentials (token, user and brand) in the storage
+   * To be used ONLY in development environments by the service providers to speed up their development processes, NEVER in production
+   * @param email
+   * @param password
+   */
+  function silentLogin(email, password) {
+    service.login(email, password)
+        .then(
+            function (token) {
+              storeCredentials(token);
+              return $q.when();
+            },
+            function () {
               return $q.reject();
             }
         );
@@ -191,15 +236,6 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
         .finally(function () {
           service.clearCredentials();
         });
-  }
-
-  /**
-   * Saves the token in the local storage and in the cookie
-   * @param token
-   */
-  function setToken(token) {
-    $localStorage.token = token;
-    $cookies.put(TOKEN_COOKIE_KEY, token);
   }
 
   /**
@@ -268,7 +304,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * be redirected after authenticating
    * @param redirectUrl URL from the specific app where to redirect back after the authentication
    */
-  function login(redirectUrl) {
+  function redirectToLogin(redirectUrl) {
     var redirectionPath = environmentsService.getLoginPath();
 
     if (isValidRedirectionUrl(redirectUrl)) {
@@ -288,6 +324,15 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     setUser(getUserFromToken(token));
 
     return $q.when(token);
+  }
+
+  /**
+   * Saves the token in the local storage and in the cookie
+   * @param token
+   */
+  function setToken(token) {
+    $localStorage.token = token;
+    $cookies.put(TOKEN_COOKIE_KEY, token);
   }
 
   /**
@@ -378,7 +423,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     redirectionPath = redirectionPath || '/';
 
     if (self.isInternalCommunication()) {
-      $timeout(function() {
+      $timeout(function () {
         $location.url(redirectionPath);
       });
     }

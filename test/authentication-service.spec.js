@@ -12,6 +12,7 @@ describe('authenticationService', function () {
   var mockedTokensAPIEndpoint = 'TOKENS_API';
   var mockedLoginPath = '/LOGIN';
   var mockedBrandId = 1;
+  var anyString = 'ANY_STRING';
   var mockedFunction = function () {
   };
   var mockedLocalstorage = {};
@@ -69,9 +70,10 @@ describe('authenticationService', function () {
         expect(authenticationService.requireAuthenticatedUser).toBeDefined();
         expect(authenticationService.redirectToHomeIfAuthenticated).toBeDefined();
         expect(authenticationService.authenticate).toBeDefined();
+        expect(authenticationService.login).toBeDefined();
+        expect(authenticationService.silentLogin).toBeDefined();
         expect(authenticationService.logout).toBeDefined();
         expect(authenticationService.silentLogout).toBeDefined();
-        expect(authenticationService.setToken).toBeDefined();
         expect(authenticationService.getToken).toBeDefined();
         expect(authenticationService.isAuthenticated).toBeDefined();
         expect(authenticationService.getUser).toBeDefined();
@@ -138,7 +140,6 @@ describe('authenticationService', function () {
 
     describe('authenticate', function () {
       it('updates the credentials if a new token is issued', function () {
-
         resolved = false;
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
         $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(200);
@@ -153,8 +154,7 @@ describe('authenticationService', function () {
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken);
       });
 
-      it('updates the credentials if there is a token which is still valid', function () {
-        // Backend returning HTTP 304
+      it('updates the credentials if there is a token which is still valid (API returning HTTP 304)', function () {
         resolved = false;
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
         $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304);
@@ -169,8 +169,7 @@ describe('authenticationService', function () {
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken);
       });
 
-      it('updates the credentials if there is a token which is still valid but has to be reissued', function () {
-        // Backend returning HTTP 409
+      it('updates the credentials if there is a token which is still valid but has to be reissued (API returning HTTP 409)', function () {
         var newToken = 'NEW_TOKEN';
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
         $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(409, newToken);
@@ -186,8 +185,7 @@ describe('authenticationService', function () {
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, newToken);
       });
 
-      it('redirects to login if there is a token but it is not valid', function () {
-        // Backend returning HTTP 401
+      it('redirects to login if there is a token but it is not valid (API returning HTTP 401)', function () {
         resolved = true;
         spyOn(authenticationService, 'clearCredentials');
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
@@ -213,6 +211,82 @@ describe('authenticationService', function () {
         expect(authenticationService.clearCredentials).toHaveBeenCalled();
         expect(environmentsService.getSolutionCenterUrl).toHaveBeenCalled();
         expect($window.location.href).toEqual(mockedDomain + '/#/login?redirect=' + mockedRedirectionUrl);
+      });
+    });
+
+    /**
+     * login
+     */
+
+    describe('login', function () {
+      it('accepts correct responses', function () {
+        resolved = false;
+        $httpBackend.expectPOST(mockedTokensAPIEndpoint).respond(200);
+
+        authenticationService.login(anyString, anyString).then(success, failure);
+        $httpBackend.flush();
+        $rootScope.$digest();
+
+        expect(resolved).toBe(true);
+      });
+
+      it('rejects error responses', function () {
+        resolved = false;
+        $httpBackend.expectPOST(mockedTokensAPIEndpoint).respond(401);
+
+        authenticationService.login(anyString, anyString).then(success, failure);
+        $httpBackend.flush();
+        $rootScope.$digest();
+
+        expect(resolved).toBe(false);
+      });
+
+      it('sets the token in the storage if the credentials provided are valid to log in', function () {
+        $localStorage.token = undefined;
+        $httpBackend.expectPOST(mockedTokensAPIEndpoint).respond(200, mockedToken);
+
+        authenticationService.login(anyString, anyString).then(success, failure);
+        $httpBackend.flush();
+        $rootScope.$digest();
+
+        expect(authenticationService.getToken()).toEqual(mockedToken);
+      });
+
+      it('does not set any token in the storage if the credentials are invalid', function () {
+        $localStorage.token = undefined;
+        $httpBackend.expectPOST(mockedTokensAPIEndpoint).respond(401);
+
+        authenticationService.login(anyString, anyString).then(success, failure);
+        $httpBackend.flush();
+        $rootScope.$digest();
+
+        expect(authenticationService.getToken()).toEqual(undefined);
+      });
+    });
+
+    /**
+     * silentLogin
+     */
+
+    describe('silentLogin', function () {
+      it('stores the credentials when the login is successful', function () {
+        $localStorage.token = undefined;
+        spyOn(authenticationService, 'login').and.returnValue($q.when(mockedToken));
+
+        authenticationService.silentLogin(anyString, anyString);
+        $rootScope.$digest();
+
+        expect($localStorage.token).toBe(mockedToken);
+      });
+
+      it('does not store any credential when the login is not possible', function () {
+        $localStorage.token = undefined;
+        spyOn(authenticationService, 'login').and.returnValue($q.reject());
+
+        authenticationService.silentLogin(anyString, anyString);
+        $rootScope.$digest();
+
+        expect($localStorage.token).toBe(undefined);
       });
     });
 
