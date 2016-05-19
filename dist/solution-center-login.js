@@ -188,7 +188,8 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
             environmentsService.getTokensAPI(self.getEnvironment()),
             {
               email: email,
-              password: password
+              password: password,
+              userAgent: getUserAgent()
             })
         .then(
             function (response) {
@@ -340,7 +341,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function storeCredentials(token) {
     service.setToken(token);
-    setUser(getUserFromToken(token));
+    setUser(getTokenPayload(token));
 
     return $q.when(token);
   }
@@ -387,6 +388,12 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
       return $q.reject("There is no token");
     }
 
+    var payload = getTokenPayload(token);
+
+    if (payload && payload.userAgent !== getUserAgent()) {
+      return $q.reject("The current browser doesn't match the one stored in the token");
+    }
+
     return $injector.get('$http')
         .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
   }
@@ -402,11 +409,11 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Extracts the user information from the body part of the JWT token
+   * Extracts the payload of the JWT token
    * @param token
    * @returns {*}
    */
-  function getUserFromToken(token) {
+  function getTokenPayload(token) {
     return jwtHelper.decodeToken(token);
   }
 
@@ -440,6 +447,13 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     else {
       $window.location.href = environmentsService.getSolutionCenterUrl(self.getEnvironment()) + "/#" + redirectionPath;
     }
+  }
+
+  /**
+   * Returns the user agent of the current browser used by user
+   */
+  function getUserAgent() {
+    return $window.navigator.userAgent;
   }
 }
 
