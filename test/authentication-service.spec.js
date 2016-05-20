@@ -404,9 +404,13 @@ describe('authenticationService', function () {
         expect(authenticationService.isAuthenticated()).toBeTruthy();
       });
 
-      it('returns true if there is no authenticated user', function () {
+      it('returns false if there is no authenticated user', function () {
         $localStorage.user = null;
 
+        expect(authenticationService.isAuthenticated()).toBeFalsy();
+      });
+      it('returns false if the user is undefined', function () {
+        $localStorage.user = undefined;
         expect(authenticationService.isAuthenticated()).toBeFalsy();
       });
     });
