@@ -10,6 +10,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
       var defaultEnvironmentName = 'LOCAL';
 
       var internalCommunication = false;
+      var html5Mode = false;
 
       /**
        * Helper method to verify whether the selected environment during the configuration phase is valid
@@ -70,6 +71,25 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
          */
         isInternalCommunication: function () {
           return internalCommunication;
+        },
+
+        /**
+         * Specifies whether all the URLs handled by the Authentication app should:
+         * - use a hash (#) in case it is false
+         * - not use a hash (#) in case it is true
+         * @param isHtml5Mode
+         */
+        setHtml5Mode: function (isHtml5Mode) {
+          html5Mode = isHtml5Mode;
+        },
+
+        /**
+         * Returns true if all the URLs handled by the Authentication app don't include a hash (#) or false in the
+         * opposite case
+         * @returns {boolean}
+         */
+        isHtml5Mode: function () {
+          return html5Mode;
         },
 
         /**
@@ -431,7 +451,8 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
       });
     }
     else {
-      $window.location.href = environmentsService.getSolutionCenterUrl(self.getEnvironment()) + "/#" + redirectionPath;
+      $window.location.href = environmentsService.getSolutionCenterUrl(self.getEnvironment())
+          + (self.isHtml5Mode() ? "/#" : '') + redirectionPath;
     }
   }
 }
