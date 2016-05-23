@@ -6,7 +6,7 @@
   ],
   "description": "Authentication service for the Zalando Solution Center",
   "main": "dist/solution-center-login.js",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/zalando-incubator/solution-center-login"

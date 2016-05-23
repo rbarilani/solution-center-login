@@ -275,11 +275,11 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Gets the user (if any) from local storage or the cookie (prioritizing the former)
+   * Gets the user (if any) from the cooker or from local storage (prioritizing the former)
    * @returns {*|null}
    */
   function getBrand() {
-    return $localStorage.brand || $cookies.get(BRAND_COOKIE_KEY);
+    return $cookies.get(BRAND_COOKIE_KEY) || $localStorage.brand;
   }
 
   /**
