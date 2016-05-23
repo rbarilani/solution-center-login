@@ -264,7 +264,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @returns {boolean}
    */
   function isAuthenticated() {
-    return service.getUser() !== null;
+    return !!service.getUser();
   }
 
   /**
