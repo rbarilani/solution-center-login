@@ -19,8 +19,12 @@ describe('authenticationService', function () {
   var mockedCookieService = jasmine.createSpyObj('mockedCookieService', ['get', 'put', 'remove']);
   var TOKEN_COOKIE_KEY = "SC_TOKEN";
   var resolved = false;
-  var success = function () { resolved = true; };
-  var failure = function () { resolved = false; };
+  var success = function () {
+    resolved = true;
+  };
+  var failure = function () {
+    resolved = false;
+  };
 
   beforeEach(function () {
     module('sc-authentication', 'angular-jwt', 'ngStorage', 'ngCookies');
@@ -61,7 +65,7 @@ describe('authenticationService', function () {
           });
     });
 
-    afterEach(function() {
+    afterEach(function () {
       $httpBackend.verifyNoOutstandingExpectation();
       $httpBackend.verifyNoOutstandingRequest();
     });
@@ -153,7 +157,7 @@ describe('authenticationService', function () {
         expect(authenticationService.getToken).toHaveBeenCalled();
         expect($localStorage.token).toBe(mockedToken);
         expect($localStorage.user).toBe(mockedUser);
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken);
+        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 
       it('updates the credentials if there is a token which is still valid (API returning HTTP 304)', function () {
@@ -168,7 +172,7 @@ describe('authenticationService', function () {
         expect(authenticationService.getToken).toHaveBeenCalled();
         expect($localStorage.token).toBe(mockedToken);
         expect($localStorage.user).toBe(mockedUser);
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken);
+        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 
       it('updates the credentials if there is a token which is still valid but has to be reissued (API returning HTTP 409)', function () {
@@ -184,7 +188,7 @@ describe('authenticationService', function () {
         expect(authenticationService.getToken).toHaveBeenCalled();
         expect($localStorage.token).toBe(newToken);
         expect($localStorage.user).toBe(mockedUser);
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, newToken);
+        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, newToken, {domain: 'domain'});
       });
 
       it('redirects to login if there is a token but it is not valid (API returning HTTP 401)', function () {
@@ -332,7 +336,7 @@ describe('authenticationService', function () {
         spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue(mockedDomain);
       });
 
-      it('invalidates the token', function() {
+      it('invalidates the token', function () {
         $httpBackend.expectDELETE(mockedTokensAPIEndpoint).respond(200);
 
         authenticationService.logout();
@@ -366,7 +370,7 @@ describe('authenticationService', function () {
      */
 
     describe('silentLogout', function () {
-      it('invalidates the token', function() {
+      it('invalidates the token', function () {
         $httpBackend.expectDELETE(mockedTokensAPIEndpoint).respond(200);
 
         authenticationService.silentLogout();

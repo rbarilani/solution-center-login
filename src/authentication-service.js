@@ -255,7 +255,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function setToken(token) {
     $localStorage.token = token;
-    $cookies.put(TOKEN_COOKIE_KEY, token);
+    $cookies.put(TOKEN_COOKIE_KEY, token, {'domain': environmentsService.getDomain(self.getEnvironment())});
   }
 
   /**
@@ -352,7 +352,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function setBrand(brandId) {
     $localStorage.brand = brandId;
-    $cookies.put(BRAND_COOKIE_KEY, brandId);
+    $cookies.put(BRAND_COOKIE_KEY, brandId, {'domain': environmentsService.getDomain(self.getEnvironment())});
   }
 
   /**
