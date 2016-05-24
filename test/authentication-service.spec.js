@@ -17,7 +17,8 @@ describe('authenticationService', function () {
   };
   var mockedLocalstorage = {};
   var mockedCookieService = jasmine.createSpyObj('mockedCookieService', ['get', 'put', 'remove']);
-  var TOKEN_COOKIE_KEY = "SC_TOKEN";
+  var BRAND_COOKIE_KEY = 'SC_BRAND';
+  var TOKEN_COOKIE_KEY = 'SC_TOKEN';
   var resolved = false;
   var success = function () {
     resolved = true;
@@ -84,7 +85,7 @@ describe('authenticationService', function () {
         expect(authenticationService.isAuthenticated).toBeDefined();
         expect(authenticationService.getUser).toBeDefined();
         expect(authenticationService.getBrand).toBeDefined();
-        expect(authenticationService.changeBrand).toBeDefined();
+        expect(authenticationService.setBrand).toBeDefined();
         expect(authenticationService.clearCredentials).toBeDefined();
         expect(authenticationService.clearBrand).toBeDefined();
       });
@@ -155,7 +156,6 @@ describe('authenticationService', function () {
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.token).toBe(mockedToken);
         expect($localStorage.user).toBe(mockedUser);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
@@ -170,7 +170,6 @@ describe('authenticationService', function () {
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.token).toBe(mockedToken);
         expect($localStorage.user).toBe(mockedUser);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
@@ -186,7 +185,6 @@ describe('authenticationService', function () {
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.token).toBe(newToken);
         expect($localStorage.user).toBe(mockedUser);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, newToken, {domain: 'domain'});
       });
@@ -274,23 +272,21 @@ describe('authenticationService', function () {
 
     describe('silentLogin', function () {
       it('stores the credentials when the login is successful', function () {
-        $localStorage.token = undefined;
         spyOn(authenticationService, 'login').and.returnValue($q.when(mockedToken));
 
         authenticationService.silentLogin(anyString, anyString);
         $rootScope.$digest();
 
-        expect($localStorage.token).toBe(mockedToken);
+        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 
       it('does not store any credential when the login is not possible', function () {
-        $localStorage.token = undefined;
         spyOn(authenticationService, 'login').and.returnValue($q.reject());
 
         authenticationService.silentLogin(anyString, anyString);
         $rootScope.$digest();
 
-        expect($localStorage.token).toBe(undefined);
+        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
     });
 
@@ -299,12 +295,6 @@ describe('authenticationService', function () {
      */
 
     describe('getToken', function () {
-      it('returns the token if it is stored in local storage', function () {
-        $localStorage.token = mockedToken;
-
-        expect(authenticationService.getToken()).toEqual(mockedToken);
-      });
-
       it('returns the token if it is stored in the cookie', function () {
         $localStorage.token = null;
         $cookies.get.and.returnValue(mockedToken);
@@ -443,29 +433,27 @@ describe('authenticationService', function () {
 
     describe('getBrand', function () {
       it('returns a brand if the user has accessed it', function () {
-        $localStorage.brand = mockedBrandId;
+        mockedCookieService.get.and.returnValue(mockedBrandId);
 
         expect(authenticationService.getBrand()).toEqual(mockedBrandId);
       });
 
-      it('returns null if there user has not accessed any brand', function () {
-        $localStorage.brand = null;
+      it('returns null if the user has not accessed any brand', function () {
+        mockedCookieService.get.and.returnValue(undefined);
 
-        expect(authenticationService.getBrand()).toEqual(null);
+        expect(authenticationService.getBrand()).toBe(undefined);
       });
     });
 
     /**
-     * changeBrand
+     * setBrand
      */
 
-    describe('changeBrand', function () {
-      it('sets a brand in the storage', function () {
-        $localStorage.brand = null;
+    describe('setBrand', function () {
+      it('sets a brand in the cookie', function () {
+        authenticationService.setBrand(mockedBrandId);
 
-        authenticationService.changeBrand(mockedBrandId);
-
-        expect($localStorage.brand).toEqual(mockedBrandId);
+        expect(mockedCookieService.put).toHaveBeenCalledWith(BRAND_COOKIE_KEY, mockedBrandId, {domain: 'domain'});
       });
     });
   });

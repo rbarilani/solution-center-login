@@ -103,7 +103,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     isAuthenticated: isAuthenticated,
     getUser: getUser,
     getBrand: getBrand,
-    changeBrand: changeBrand,
+    setBrand: setBrand,
     clearCredentials: clearCredentials,
     clearBrand: clearBrand
   };
@@ -242,11 +242,11 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Gets the token (if any) from local storage or the cookie (prioritizing the former)
+   * Gets the token from the cookie
    * @returns {*|null}
    */
   function getToken() {
-    return $localStorage.token || $cookies.get(TOKEN_COOKIE_KEY);
+    return $cookies.get(TOKEN_COOKIE_KEY);
   }
 
   /**
@@ -254,7 +254,6 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @param token
    */
   function setToken(token) {
-    $localStorage.token = token;
     $cookies.put(TOKEN_COOKIE_KEY, token, {'domain': environmentsService.getDomain(self.getEnvironment())});
   }
 
@@ -279,19 +278,19 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @returns {*|null}
    */
   function getBrand() {
-    return $cookies.get(BRAND_COOKIE_KEY) || $localStorage.brand;
+    return $cookies.get(BRAND_COOKIE_KEY);
   }
 
   /**
-   * Updates the id of current brand the user is accessing to
+   * Saves the id of the current brand the user is accessing
    * @param brandId
    */
-  function changeBrand(brandId) {
-    setBrand(brandId);
+  function setBrand(brandId) {
+    $cookies.put(BRAND_COOKIE_KEY, brandId, {'domain': environmentsService.getDomain(self.getEnvironment())});
   }
 
   /**
-   * Removes the credentials (token, user and brand) from local storage
+   * Removes all the credentials (token, user and brand)
    */
   function clearCredentials() {
     clearToken();
@@ -300,10 +299,9 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Removes the brand from the storage
+   * Removes the brand from the cookie
    */
   function clearBrand() {
-    $localStorage.brand = null;
     $cookies.remove(BRAND_COOKIE_KEY);
   }
 
@@ -347,19 +345,9 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Saves the id of the current brand the user is accessing to
-   * @param brandId
-   */
-  function setBrand(brandId) {
-    $localStorage.brand = brandId;
-    $cookies.put(BRAND_COOKIE_KEY, brandId, {'domain': environmentsService.getDomain(self.getEnvironment())});
-  }
-
-  /**
    * Removes the token from local storage and the cookie
    */
   function clearToken() {
-    $localStorage.token = null;
     $cookies.remove(TOKEN_COOKIE_KEY);
   }
 
