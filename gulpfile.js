@@ -10,6 +10,8 @@ var plumber = require('gulp-plumber');
 var order = require("gulp-order");
 var flatten = require("gulp-flatten");
 var eslint = require('gulp-eslint');
+var gutil = require('gulp-util');
+var gulpif = require('gulp-if');
 
 var config = {
     pkg : JSON.parse(fs.readFileSync('./package.json')),
@@ -33,7 +35,7 @@ gulp.task('lint', function () {
   return gulp.src('src/*.js')
       .pipe(eslint())
       .pipe(eslint.format())
-      .pipe(eslint.failAfterError());
+      .pipe(gulpif(!gutil.env.dev, eslint.failAfterError()));
 });
 
 gulp.task('scripts', function() {
