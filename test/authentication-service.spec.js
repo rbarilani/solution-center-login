@@ -85,7 +85,7 @@ describe('authenticationService', function () {
         expect(authenticationService.isAuthenticated).toBeDefined();
         expect(authenticationService.getUser).toBeDefined();
         expect(authenticationService.getBrand).toBeDefined();
-        expect(authenticationService.changeBrand).toBeDefined();
+        expect(authenticationService.setBrand).toBeDefined();
         expect(authenticationService.clearCredentials).toBeDefined();
         expect(authenticationService.clearBrand).toBeDefined();
       });
@@ -432,28 +432,28 @@ describe('authenticationService', function () {
      */
 
     describe('getBrand', function () {
-      xit('returns a brand if the user has accessed it', function () {
-        spyOn('$cookies', 'get').and.returnValue(mockedBrandId);
+      it('returns a brand if the user has accessed it', function () {
+        mockedCookieService.get.and.returnValue(mockedBrandId);
 
         expect(authenticationService.getBrand()).toEqual(mockedBrandId);
       });
 
       it('returns null if the user has not accessed any brand', function () {
-        expect(authenticationService.getBrand()).toBe(null);
+        mockedCookieService.get.and.returnValue(undefined);
+
+        expect(authenticationService.getBrand()).toBe(undefined);
       });
     });
 
     /**
-     * changeBrand
+     * setBrand
      */
 
-    xdescribe('changeBrand', function () {
-      it('sets a brand in the storage', function () {
-        $localStorage.brand = null;
+    describe('setBrand', function () {
+      it('sets a brand in the cookie', function () {
+        authenticationService.setBrand(mockedBrandId);
 
-        authenticationService.changeBrand(mockedBrandId);
-
-        expect($localStorage.brand).toEqual(mockedBrandId);
+        expect(mockedCookieService.put).toHaveBeenCalledWith(BRAND_COOKIE_KEY, mockedBrandId, {domain: 'domain'});
       });
     });
   });

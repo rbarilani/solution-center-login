@@ -110,7 +110,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     isAuthenticated: isAuthenticated,
     getUser: getUser,
     getBrand: getBrand,
-    changeBrand: changeBrand,
+    setBrand: setBrand,
     clearCredentials: clearCredentials,
     clearBrand: clearBrand
   };
@@ -289,11 +289,11 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Updates the id of current brand the user is accessing to
+   * Saves the id of the current brand the user is accessing
    * @param brandId
    */
-  function changeBrand(brandId) {
-    setBrand(brandId);
+  function setBrand(brandId) {
+    $cookies.put(BRAND_COOKIE_KEY, brandId, {'domain': environmentsService.getDomain(self.getEnvironment())});
   }
 
   /**
@@ -349,14 +349,6 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function setUser(user) {
     $localStorage.user = user;
-  }
-
-  /**
-   * Saves the id of the current brand the user is accessing to
-   * @param brandId
-   */
-  function setBrand(brandId) {
-    $cookies.put(BRAND_COOKIE_KEY, brandId, {'domain': environmentsService.getDomain(self.getEnvironment())});
   }
 
   /**
