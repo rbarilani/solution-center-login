@@ -5,10 +5,12 @@ describe('authenticationService', function () {
       $httpBackend, jwtHelper, $window, $timeout;
 
   var mockedToken = 'JWT_TOKEN';
+  var mockedUserAgent = 'browser';
+  var mockedUser = {id: 1, firstName: 'Chuck', lastName: 'Norris'};
+  var mockedTokenPayload = {user: mockedUser, userAgent: mockedUserAgent};
   var mockedDomain = 'domain';
   var mockedRedirectionUrl = 'app.domain';
   var mockedOriginUrl = 'ORIGIN';
-  var mockedUser = {id: 1, firstName: 'Chuck', lastName: 'Norris'};
   var mockedTokensAPIEndpoint = 'TOKENS_API';
   var mockedLoginPath = '/LOGIN';
   var mockedBrandId = 1;
@@ -39,7 +41,7 @@ describe('authenticationService', function () {
   describe('general behaviour', function () {
     beforeEach(function () {
       module('sc-authentication', function ($provide, authenticationServiceProvider) {
-        $provide.value('$window', {location: {href: mockedOriginUrl}});
+        $provide.value('$window', {location: {href: mockedOriginUrl}, navigator: {userAgent: mockedUserAgent}});
         $provide.value('$localStorage', mockedLocalstorage);
         $provide.value('$cookies', mockedCookieService);
         authenticationServiceProvider.setInternalCommunication(false);
@@ -61,7 +63,7 @@ describe('authenticationService', function () {
 
             spyOn(environmentsService, 'getDomain').and.returnValue(mockedDomain);
             spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
-            spyOn(jwtHelper, 'decodeToken').and.returnValue(mockedUser);
+            spyOn(jwtHelper, 'decodeToken').and.returnValue(mockedTokenPayload);
             spyOn(authenticationService, 'setToken').and.callThrough();
           });
     });
@@ -156,7 +158,9 @@ describe('authenticationService', function () {
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.user).toBe(mockedUser);
+        expect($localStorage.user.id).toBe(mockedUser.id);
+        expect($localStorage.user.firstName).toBe(mockedUser.firstName);
+        expect($localStorage.user.lastName).toBe(mockedUser.lastName);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 
@@ -170,7 +174,9 @@ describe('authenticationService', function () {
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.user).toBe(mockedUser);
+        expect($localStorage.user.id).toBe(mockedUser.id);
+        expect($localStorage.user.firstName).toBe(mockedUser.firstName);
+        expect($localStorage.user.lastName).toBe(mockedUser.lastName);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 
