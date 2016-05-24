@@ -151,7 +151,7 @@ describe('authenticationService', function () {
       it('updates the credentials if there is a token which is still valid (API returning HTTP 304)', function () {
         resolved = false;
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304, mockedUser);
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304, mockedUser, {'Authorization': mockedToken});
 
         authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
         $httpBackend.flush();
@@ -165,10 +165,10 @@ describe('authenticationService', function () {
       });
 
       it('updates the credentials if there is a token which is still valid but has to be reissued (API returning HTTP 409)', function () {
+        resolved = false;
         var newToken = 'NEW_TOKEN';
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(409, mockedUser);
-        resolved = false;
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(409, mockedUser, {'Authorization': newToken});
 
         authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
         $httpBackend.flush();
