@@ -7,7 +7,7 @@ describe('authenticationService', function () {
   var mockedToken = 'JWT_TOKEN';
   var mockedUserAgent = 'browser';
   var mockedUser = {id: 1, firstName: 'Chuck', lastName: 'Norris'};
-  var mockedTokenPayload = {user: mockedUser, userAgent: mockedUserAgent};
+  var mockedTokenPayload = {user: mockedUser, agent: mockedUserAgent};
   var mockedDomain = 'domain';
   var mockedRedirectionUrl = 'app.domain';
   var mockedOriginUrl = 'ORIGIN';
@@ -148,26 +148,10 @@ describe('authenticationService', function () {
      */
 
     describe('authenticate', function () {
-      it('updates the credentials if a new token is issued', function () {
-        resolved = false;
-        spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(200);
-
-        authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
-        $httpBackend.flush();
-
-        expect(resolved).toBe(true);
-        expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.user.id).toBe(mockedUser.id);
-        expect($localStorage.user.firstName).toBe(mockedUser.firstName);
-        expect($localStorage.user.lastName).toBe(mockedUser.lastName);
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
-      });
-
       it('updates the credentials if there is a token which is still valid (API returning HTTP 304)', function () {
         resolved = false;
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304);
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304, );
 
         authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
         $httpBackend.flush();
