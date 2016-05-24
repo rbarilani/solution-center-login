@@ -182,7 +182,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
             {
               email: email,
               password: password,
-              userAgent: getUserAgent()
+              agent: getUserAgent()
             })
         .then(
             function (response) {
@@ -371,8 +371,8 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
 
     var payload = getTokenPayload(token);
 
-    if (payload && payload.userAgent !== getUserAgent()) {
-      return $q.reject("The current browser doesn't match the one stored in the token");
+    if (payload && payload.agent !== getUserAgent()) {
+      return $q.reject("The current browser's user agent doesn't match the one stored in the token");
     }
 
     return $injector.get('$http')

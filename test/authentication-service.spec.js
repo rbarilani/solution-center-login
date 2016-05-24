@@ -158,7 +158,9 @@ describe('authenticationService', function () {
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.user).toBe(mockedUser);
+        expect($localStorage.user.id).toBe(mockedUser.id);
+        expect($localStorage.user.firstName).toBe(mockedUser.firstName);
+        expect($localStorage.user.lastName).toBe(mockedUser.lastName);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 
@@ -172,7 +174,9 @@ describe('authenticationService', function () {
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.user).toBe(mockedUser);
+        expect($localStorage.user.id).toBe(mockedUser.id);
+        expect($localStorage.user.firstName).toBe(mockedUser.firstName);
+        expect($localStorage.user.lastName).toBe(mockedUser.lastName);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 

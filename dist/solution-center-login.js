@@ -189,7 +189,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
             {
               email: email,
               password: password,
-              userAgent: getUserAgent()
+              agent: getUserAgent()
             })
         .then(
             function (response) {
@@ -378,7 +378,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
 
     var payload = getTokenPayload(token);
 
-    if (payload && payload.userAgent !== getUserAgent()) {
+    if (payload && payload.agent !== getUserAgent()) {
       return $q.reject("The current browser doesn't match the one stored in the token");
     }
 
