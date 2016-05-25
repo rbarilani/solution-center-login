@@ -155,6 +155,7 @@ describe('authenticationService', function () {
 
         authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
         $httpBackend.flush();
+        $rootScope.$digest();
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
@@ -265,20 +266,25 @@ describe('authenticationService', function () {
     describe('silentLogin', function () {
       it('stores the credentials when the login is successful', function () {
         spyOn(authenticationService, 'login').and.returnValue($q.when(mockedToken));
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304, mockedUser, {'Authorization': mockedToken});
 
         authenticationService.silentLogin(anyString, anyString);
+        $httpBackend.flush();
         $rootScope.$digest();
 
+        expect(authenticationService.login).toHaveBeenCalledWith(anyString, anyString);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 
       it('does not store any credential when the login is not possible', function () {
         spyOn(authenticationService, 'login').and.returnValue($q.reject());
+        mockedCookieService.put.calls.reset();
 
         authenticationService.silentLogin(anyString, anyString);
         $rootScope.$digest();
 
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
+        expect(authenticationService.login).toHaveBeenCalledWith(anyString, anyString);
+        expect(mockedCookieService.put).not.toHaveBeenCalled();
       });
     });
 

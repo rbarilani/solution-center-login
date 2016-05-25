@@ -355,8 +355,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @returns {*|Promise}
    */
   function storeCredentials(apiResponse) {
-    var token = apiResponse.headers()['Authorization'];
-
+    var token = apiResponse.headers()['authorization'];
     service.setToken(token);
     setUser(apiResponse.data);
 
