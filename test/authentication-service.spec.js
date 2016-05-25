@@ -209,6 +209,19 @@ describe('authenticationService', function () {
         expect(environmentsService.getSolutionCenterUrl).toHaveBeenCalled();
         expect($window.location.href).toEqual(mockedDomain + '/#/login?redirect=' + mockedRedirectionUrl);
       });
+
+      it('redirects to login if the user agent does not match the token', function () {
+        spyOn(authenticationService, 'clearCredentials');
+        spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue(mockedDomain);
+        spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
+        $window.navigator.userAgent = 'BAD_AGENT';
+        authenticationService.authenticate(mockedRedirectionUrl);
+        $rootScope.$digest();
+
+        expect(authenticationService.clearCredentials).toHaveBeenCalled();
+        expect(environmentsService.getSolutionCenterUrl).toHaveBeenCalled();
+        expect($window.location.href).toEqual(mockedDomain + '/#/login?redirect=' + mockedRedirectionUrl);
+      });
     });
 
     /**
