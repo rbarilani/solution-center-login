@@ -3,47 +3,12 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
       function ($localStorageProvider) {
         $localStorageProvider.setKeyPrefix('solutionCenter-');
       }])
-    .provider('authenticationService', ['ENVIRONMENTS', 'environmentsProvider', function (ENVIRONMENTS, environmentsProvider) {
+    .provider('authenticationService', ['environmentsProvider', function (environmentsProvider) {
       'use strict';
-
-      var environment;
-      var defaultEnvironmentName = 'LOCAL';
 
       var internalCommunication = false;
 
-      console.log('=========== START solution-center-login');
-      console.log('environmentsProvider', environmentsProvider);
-      console.log('configEnvironment BEFORE SET', environmentsProvider.getCurrentEnvironment());
-      console.log('=========== END solution-center-login');
-      console.log('\n');
-
-      /**
-       * Helper method to verify whether the selected environment during the configuration phase is valid
-       * @param name
-       * @returns {boolean}
-       */
-      var isValidEnvironment = function (name) {
-        return !!ENVIRONMENTS[name];
-      };
-
       return {
-        /**
-         * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
-         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGE', 'LOCAL'
-         * @param port Only used for development environments (LOCAL) if using a port different than the default one (3333)
-         * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
-         */
-        configEnvironment: function (name, port, tokenService) {
-          environment = {};
-          environment.name = isValidEnvironment(name) ? name : defaultEnvironmentName;
-
-          console.log('configEnvironment AFTER SET', environmentsProvider.getCurrentEnvironment());
-
-          if (environment.name === defaultEnvironmentName) {
-            environment.port = port || ENVIRONMENTS[defaultEnvironmentName].port;
-            environment.tokenService = tokenService || ENVIRONMENTS[defaultEnvironmentName].tokenservice;
-          }
-        },
 
         /**
          * Returns the configured environment of the app
@@ -51,14 +16,6 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
          * @returns {{name: string, port: string, tokenService: string}}
          */
         getEnvironment: function () {
-          // if (!environment) {
-          //   environment = {
-          //     name: defaultEnvironmentName,
-          //     port: ENVIRONMENTS[defaultEnvironmentName].port,
-          //     tokenService: ENVIRONMENTS[defaultEnvironmentName].tokenservice
-          //   };
-          // }
-          // return environment;
           return environmentsProvider.getCurrentEnvironment();
         },
 
