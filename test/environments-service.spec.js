@@ -2,25 +2,31 @@ describe('environmentsService', function () {
   'use strict';
 
   var environmentsService, $rootScope;
+  var environmentsProvider;
 
   var mockedEnvironment, mockedPort = 'MOCKED_PORT';
 
   beforeEach(function () {
     module('sc-authentication');
+    module('solution.center.communicator');
 
     inject(
-        function (_$rootScope_, _environmentsService_) {
+        function (_$rootScope_, _environmentsService_, _environments_) {
           $rootScope = _$rootScope_;
           environmentsService = _environmentsService_;
+          environmentsProvider = _environments_;
         });
 
     mockedEnvironment = {
-      name: 'MOCKED_NAME',
-      port: mockedPort
+      NAME: 'MOCKED_NAME',
+      PORT: mockedPort,
+      URL: 'test-url'
     };
   });
 
   describe('initial state', function () {
+    console.log('======================= environments pro');
+    console.log(environmentsProvider);
     it('has known state', function () {
       expect(environmentsService.getSolutionCenterUrl).toBeDefined();
       expect(environmentsService.getLoginPath).toBeDefined();
@@ -36,7 +42,7 @@ describe('environmentsService', function () {
 
   describe('getSolutionCenterUrl', function () {
     it('returns the solution center url for production environment', function () {
-      mockedEnvironment.name = 'PRODUCTION';
+      mockedEnvironment.NAME = 'PRODUCTION';
 
       var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
@@ -44,7 +50,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the solution center url for integration environment', function () {
-      mockedEnvironment.name = 'INTEGRATION';
+      mockedEnvironment.NAME = 'INTEGRATION';
 
       var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
@@ -52,7 +58,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the solution center url for stage environment', function () {
-      mockedEnvironment.name = 'STAGE';
+      mockedEnvironment.NAME = 'STAGE';
 
       var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
@@ -60,7 +66,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the solution center url for development environment', function () {
-      mockedEnvironment.name = 'DEVELOPMENT';
+      mockedEnvironment.NAME = 'DEVELOPMENT';
 
       var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
@@ -68,7 +74,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the solution center url for local environment', function () {
-      mockedEnvironment.name = 'LOCAL';
+      mockedEnvironment.NAME = 'LOCAL';
 
       var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
@@ -109,7 +115,7 @@ describe('environmentsService', function () {
 
   describe('getTokensAPI', function () {
     it('returns the token API endpoint for production environment', function () {
-      mockedEnvironment.name = 'PRODUCTION';
+      mockedEnvironment.NAME = 'PRODUCTION';
 
       var endpoint = environmentsService.getTokensAPI(mockedEnvironment);
 
@@ -118,7 +124,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the token API endpoint for integration environment', function () {
-      mockedEnvironment.name = 'INTEGRATION';
+      mockedEnvironment.NAME = 'INTEGRATION';
 
       var endpoint = environmentsService.getTokensAPI(mockedEnvironment);
 
@@ -127,7 +133,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the token API endpoint for stage environment', function () {
-      mockedEnvironment.name = 'STAGE';
+      mockedEnvironment.NAME = 'STAGE';
 
       var endpoint = environmentsService.getTokensAPI(mockedEnvironment);
 
@@ -136,7 +142,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the token API endpoint for development environment', function () {
-      mockedEnvironment.name = 'DEVELOPMENT';
+      mockedEnvironment.NAME = 'DEVELOPMENT';
 
       var endpoint = environmentsService.getTokensAPI(mockedEnvironment);
 
@@ -145,7 +151,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the token API endpoint for local environment', function () {
-      mockedEnvironment.name = 'LOCAL';
+      mockedEnvironment.NAME = 'LOCAL';
 
       var endpoint = environmentsService.getTokensAPI(mockedEnvironment);
 
@@ -160,7 +166,7 @@ describe('environmentsService', function () {
 
   describe('getDomain', function () {
     it('returns the domain for production environment', function () {
-      mockedEnvironment.name = 'PRODUCTION';
+      mockedEnvironment.NAME = 'PRODUCTION';
 
       var domain = environmentsService.getDomain(mockedEnvironment);
 
@@ -168,7 +174,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the domain for integration environment', function () {
-      mockedEnvironment.name = 'INTEGRATION';
+      mockedEnvironment.NAME = 'INTEGRATION';
 
       var domain = environmentsService.getDomain(mockedEnvironment);
 
@@ -176,7 +182,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the domain for stage environment', function () {
-      mockedEnvironment.name = 'STAGE';
+      mockedEnvironment.NAME = 'STAGE';
 
       var domain = environmentsService.getDomain(mockedEnvironment);
 
@@ -184,7 +190,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the domain for development environment', function () {
-      mockedEnvironment.name = 'DEVELOPMENT';
+      mockedEnvironment.NAME = 'DEVELOPMENT';
 
       var domain = environmentsService.getDomain(mockedEnvironment);
 
@@ -192,7 +198,7 @@ describe('environmentsService', function () {
     });
 
     it('returns the domain for local environment', function () {
-      mockedEnvironment.name = 'LOCAL';
+      mockedEnvironment.NAME = 'LOCAL';
 
       var domain = environmentsService.getDomain(mockedEnvironment);
 
