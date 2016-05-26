@@ -28,9 +28,17 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
         },
 
         /**
+         * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
+         * @param name {string} Possible values: 'PRODUCTION', 'STAGE', 'INTEGRATION', 'DEVELOPMENT' (only for Norris team), 'LOCAL', 'TESTING'
+         * @returns Configured or fallback (LOCAL) environment
+         */
+        configEnvironment: function (name) {
+          return environmentsProvider.setCurrentEnvironment(name);
+        },
+
+        /**
          * Returns the configured environment of the app
-         * If it was not configured before it sets it to the default environment values (LOCAL)
-         * @returns {{name: string, port: string, tokenService: string}}
+         * @returns Configured or fallback (LOCAL) environment
          */
         getEnvironment: function () {
           return environmentsProvider.getCurrentEnvironment();
