@@ -7,7 +7,7 @@ describe('authenticationService', function () {
   var mockedToken = 'JWT_TOKEN';
   var mockedUserAgent = 'browser';
   var mockedUser = {id: 1, firstName: 'Chuck', lastName: 'Norris'};
-  var mockedTokenPayload = {user: mockedUser, userAgent: mockedUserAgent};
+  var mockedTokenPayload = {user: mockedUser, agent: mockedUserAgent};
   var mockedDomain = 'domain';
   var mockedRedirectionUrl = 'app.domain';
   var mockedOriginUrl = 'ORIGIN';
@@ -148,29 +148,14 @@ describe('authenticationService', function () {
      */
 
     describe('authenticate', function () {
-      it('updates the credentials if a new token is issued', function () {
+      it('updates the credentials if there is a token which is still valid (API returning HTTP 200)', function () {
         resolved = false;
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(200);
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(200, mockedUser, {'Authorization': mockedToken});
 
         authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
         $httpBackend.flush();
-
-        expect(resolved).toBe(true);
-        expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.user.id).toBe(mockedUser.id);
-        expect($localStorage.user.firstName).toBe(mockedUser.firstName);
-        expect($localStorage.user.lastName).toBe(mockedUser.lastName);
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
-      });
-
-      it('updates the credentials if there is a token which is still valid (API returning HTTP 304)', function () {
-        resolved = false;
-        spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304);
-
-        authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
-        $httpBackend.flush();
+        $rootScope.$digest();
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
@@ -181,17 +166,19 @@ describe('authenticationService', function () {
       });
 
       it('updates the credentials if there is a token which is still valid but has to be reissued (API returning HTTP 409)', function () {
+        resolved = false;
         var newToken = 'NEW_TOKEN';
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(409, newToken);
-        resolved = false;
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(409, mockedUser, {'Authorization': newToken});
 
         authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
         $httpBackend.flush();
 
         expect(resolved).toBe(true);
         expect(authenticationService.getToken).toHaveBeenCalled();
-        expect($localStorage.user).toBe(mockedUser);
+        expect($localStorage.user.id).toBe(mockedUser.id);
+        expect($localStorage.user.firstName).toBe(mockedUser.firstName);
+        expect($localStorage.user.lastName).toBe(mockedUser.lastName);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, newToken, {domain: 'domain'});
       });
 
@@ -215,6 +202,19 @@ describe('authenticationService', function () {
         spyOn(authenticationService, 'clearCredentials');
         spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue(mockedDomain);
         spyOn(authenticationService, 'getToken').and.returnValue(undefined);
+        authenticationService.authenticate(mockedRedirectionUrl);
+        $rootScope.$digest();
+
+        expect(authenticationService.clearCredentials).toHaveBeenCalled();
+        expect(environmentsService.getSolutionCenterUrl).toHaveBeenCalled();
+        expect($window.location.href).toEqual(mockedDomain + '/#/login?redirect=' + mockedRedirectionUrl);
+      });
+
+      it('redirects to login if the user agent does not match the token', function () {
+        spyOn(authenticationService, 'clearCredentials');
+        spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue(mockedDomain);
+        spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
+        $window.navigator.userAgent = 'BAD_AGENT';
         authenticationService.authenticate(mockedRedirectionUrl);
         $rootScope.$digest();
 
@@ -279,20 +279,25 @@ describe('authenticationService', function () {
     describe('silentLogin', function () {
       it('stores the credentials when the login is successful', function () {
         spyOn(authenticationService, 'login').and.returnValue($q.when(mockedToken));
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(200, mockedUser, {'Authorization': mockedToken});
 
         authenticationService.silentLogin(anyString, anyString);
+        $httpBackend.flush();
         $rootScope.$digest();
 
+        expect(authenticationService.login).toHaveBeenCalledWith(anyString, anyString);
         expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
       });
 
       it('does not store any credential when the login is not possible', function () {
         spyOn(authenticationService, 'login').and.returnValue($q.reject());
+        mockedCookieService.put.calls.reset();
 
         authenticationService.silentLogin(anyString, anyString);
         $rootScope.$digest();
 
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
+        expect(authenticationService.login).toHaveBeenCalledWith(anyString, anyString);
+        expect(mockedCookieService.put).not.toHaveBeenCalled();
       });
     });
 

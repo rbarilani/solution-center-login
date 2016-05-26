@@ -23,7 +23,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
       return {
         /**
          * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
-         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGE', 'LOCAL'
+         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGE', 'DEVELOPMENT' (only for Norris team) and 'LOCAL'
          * @param port Only used for development environments (LOCAL) if using a port different than the default one (3333)
          * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
          */
@@ -138,34 +138,12 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Performs the authentication of the user through the following steps:
-   *  - Validation of the token (if already existent)
-   *  - Storage of the credentials (if the token is valid/renewed)
-   *  - Redirection to login page to prompt the user to login (non-existent or invalid token)
+   * Performs the authentication of the user
    * @param redirectUrl URL from the specific app where to redirect back after the authentication
    * @returns {*}
    */
   function authenticate(redirectUrl) {
-    var token = service.getToken();
-
-    return validateToken(token)
-        .then(
-            function () {
-              return storeCredentials(token);
-            },
-            function (response) {
-              if (response.status === 304) {
-                return storeCredentials(token);
-              }
-              else if (response.status === 409) {
-                var newToken = response.data;
-                return storeCredentials(newToken);
-              }
-              service.clearCredentials();
-              redirectToLogin(redirectUrl);
-              return $q.reject();
-            }
-        );
+    return handleTokenValidation(service.getToken(), redirectUrl);
   }
 
   /**
@@ -204,8 +182,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     return service.login(email, password)
         .then(
             function (token) {
-              storeCredentials(token);
-              return $q.when();
+              return handleTokenValidation(token);
             },
             function () {
               return $q.reject();
@@ -326,15 +303,65 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   }
 
   /**
-   * Saves the credentials (token, user and brand) in local storage
+   * Performs the authentication of the user through the following steps:
+   *  - Validation of the token (if already existent)
+   *  - Storage of the credentials (if the token is valid/renewed)
+   *  - Redirection to login page to prompt the user to login (non-existent or invalid token)
    * @param token
-   * @returns {*|Promise}
+   * @param redirectUrl redirectUrl URL from the specific app where to redirect back after the authentication
+   * @returns {*}
    */
-  function storeCredentials(token) {
-    service.setToken(token);
-    setUser(getTokenPayload(token));
+  function handleTokenValidation(token, redirectUrl) {
+    return validateToken(token)
+      .then(
+        function (response) {
+          if (response.status === 200) {
+            storeCredentials(response);
+            return $q.when();
+          }
+        },
+        function (response) {
+          if (response.status === 409) {
+            storeCredentials(response);
+            return $q.when();
+          }
+          service.clearCredentials();
+          if (redirectUrl) {
+            redirectToLogin(redirectUrl);
+          }
+          return $q.reject();
+        }
+      );
+  }
 
-    return $q.when(token);
+  /**
+   * Performs an API call to verify whether a token is valid or not
+   * @param token
+   * @returns {*} A promise with the response from the API or directly rejected if there is no token to validate
+   */
+  function validateToken(token) {
+    if (!token) {
+      return $q.reject("There is no token");
+    }
+
+    var payload = getTokenPayload(token);
+
+    if (payload && payload.agent !== getUserAgent()) {
+      return $q.reject("The current browser's user agent doesn't match the one stored in the token");
+    }
+
+    return $injector.get('$http')
+        .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
+  }
+
+  /**
+   * Stores the credentials returned by the API
+   * @param apiResponse
+   */
+  function storeCredentials(apiResponse) {
+    var token = apiResponse.headers()['authorization'];
+    service.setToken(token);
+    setUser(apiResponse.data);
   }
 
   /**
@@ -357,26 +384,6 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function clearUser() {
     $localStorage.user = null;
-  }
-
-  /**
-   * Performs an API call to verify whether a token is valid or not
-   * @param token
-   * @returns {*} A promise with the response from the API or directly rejected if there is no token to validate
-   */
-  function validateToken(token) {
-    if (!token) {
-      return $q.reject("There is no token");
-    }
-
-    var payload = getTokenPayload(token);
-
-    if (payload && payload.agent !== getUserAgent()) {
-      return $q.reject("The current browser's user agent doesn't match the one stored in the token");
-    }
-
-    return $injector.get('$http')
-        .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
   }
 
   /**
