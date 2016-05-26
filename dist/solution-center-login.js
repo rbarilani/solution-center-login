@@ -320,20 +320,25 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function handleTokenValidation(token, redirectUrl) {
     return validateToken(token)
-        .catch(
-            // This API endpoint never responds with a status in the range 200-299.
-            // Whenever it's redesigned this has to be changed to a 'then' method
-            function (response) {
-              if (response.status === 304 || response.status === 409) {
-                return storeCredentials(response);
-              }
-              service.clearCredentials();
-              if (redirectUrl) {
-                redirectToLogin(redirectUrl);
-              }
-              return $q.reject();
-            }
-        );
+      .then(
+        function (response) {
+          if (response.status === 200) {
+            storeCredentials(response);
+            return $q.when();
+          }
+        },
+        function (response) {
+          if (response.status === 409) {
+            storeCredentials(response);
+            return $q.when();
+          }
+          service.clearCredentials();
+          if (redirectUrl) {
+            redirectToLogin(redirectUrl);
+          }
+          return $q.reject();
+        }
+      );
   }
 
   /**
@@ -359,15 +364,11 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
   /**
    * Stores the credentials returned by the API
    * @param apiResponse
-   * @returns {*|Promise}
    */
   function storeCredentials(apiResponse) {
-    var token = apiResponse.headers()['Authorization'];
-
+    var token = apiResponse.headers()['authorization'];
     service.setToken(token);
     setUser(apiResponse.data);
-
-    return $q.when(token);
   }
 
   /**
