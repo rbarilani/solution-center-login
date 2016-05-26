@@ -45,6 +45,7 @@ describe('authenticationService', function () {
         $provide.value('$localStorage', mockedLocalstorage);
         $provide.value('$cookies', mockedCookieService);
         authenticationServiceProvider.setInternalCommunication(false);
+        authenticationServiceProvider.configEnvironment('LOCAL');
       });
 
       inject(
