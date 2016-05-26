@@ -148,10 +148,10 @@ describe('authenticationService', function () {
      */
 
     describe('authenticate', function () {
-      it('updates the credentials if there is a token which is still valid (API returning HTTP 304)', function () {
+      it('updates the credentials if there is a token which is still valid (API returning HTTP 200)', function () {
         resolved = false;
         spyOn(authenticationService, 'getToken').and.returnValue(mockedToken);
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304, mockedUser, {'Authorization': mockedToken});
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(200, mockedUser, {'Authorization': mockedToken});
 
         authenticationService.authenticate(mockedRedirectionUrl).then(success, failure);
         $httpBackend.flush();
@@ -279,7 +279,7 @@ describe('authenticationService', function () {
     describe('silentLogin', function () {
       it('stores the credentials when the login is successful', function () {
         spyOn(authenticationService, 'login').and.returnValue($q.when(mockedToken));
-        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(304, mockedUser, {'Authorization': mockedToken});
+        $httpBackend.expectGET(mockedTokensAPIEndpoint).respond(200, mockedUser, {'Authorization': mockedToken});
 
         authenticationService.silentLogin(anyString, anyString);
         $httpBackend.flush();
