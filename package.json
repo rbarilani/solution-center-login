@@ -66,5 +66,5 @@
   "scripts": {
     "test": "./node_modules/gulp/bin/gulp.js test"
   },
-  "version": "0.4.0"
+  "version": "0.5.0"
 }
