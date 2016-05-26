@@ -2,31 +2,36 @@ describe('environmentsService', function () {
   'use strict';
 
   var environmentsService, $rootScope;
-  var environmentsProvider;
 
-  var mockedEnvironment, mockedPort = 'MOCKED_PORT';
+  var mockedEnvironment;
 
   beforeEach(function () {
     module('sc-authentication');
-    module('solution.center.communicator');
 
     inject(
-        function (_$rootScope_, _environmentsService_, _environments_) {
+        function (_$rootScope_, _environmentsService_) {
           $rootScope = _$rootScope_;
           environmentsService = _environmentsService_;
-          environmentsProvider = _environments_;
         });
 
     mockedEnvironment = {
-      NAME: 'MOCKED_NAME',
-      PORT: mockedPort,
-      URL: 'test-url'
+      NAME: 'PRODUCTION',
+      URL: 'https://solutions.zalando.com',
+      DOMAIN: 'solutions.zalando.com',
+      PORT: 'MOCKED_PORT',
+      USER_SERVICE: {
+        BASE_URL: 'https://user-management.norris.zalan.do'
+      },
+      TOKEN_SERVICE: {
+        BASE_URL: 'https://token-management.norris.zalan.do'
+      },
+      MERCHANT_SERVICE: {
+        BASE_URL: 'https://merchant-management.norris.zalan.do'
+      }
     };
   });
 
   describe('initial state', function () {
-    console.log('======================= environments pro');
-    console.log(environmentsProvider);
     it('has known state', function () {
       expect(environmentsService.getSolutionCenterUrl).toBeDefined();
       expect(environmentsService.getLoginPath).toBeDefined();
@@ -79,7 +84,13 @@ describe('environmentsService', function () {
       var url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
 
       expect(typeof url).toBe('string');
-      expect(url.indexOf(mockedPort)).toBeGreaterThan(-1);
+      expect(url.indexOf(mockedEnvironment.PORT)).toBeGreaterThan(-1);
+
+      // ensure port is NOT added if invalid
+      mockedEnvironment.PORT = null;
+      url = environmentsService.getSolutionCenterUrl(mockedEnvironment);
+      expect(url.indexOf(mockedEnvironment.PORT)).toBe(-1);
+
     });
   });
 
