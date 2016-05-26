@@ -3,28 +3,10 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
       function ($localStorageProvider) {
         $localStorageProvider.setKeyPrefix('solutionCenter-');
       }])
-    .provider('authenticationService', ['ENVIRONMENTS', 'environmentsProvider', function (ENVIRONMENTS, environmentsProvider) {
+    .provider('authenticationService', ['environmentsProvider', function (environmentsProvider) {
       'use strict';
 
-      var environment;
-      var defaultEnvironmentName = 'LOCAL';
-
       var internalCommunication = false;
-
-      console.log('=========== START solution-center-login');
-      console.log('environmentsProvider', environmentsProvider);
-      console.log('configEnvironment BEFORE SET', environmentsProvider.getCurrentEnvironment());
-      console.log('=========== END solution-center-login');
-      console.log('\n');
-
-      /**
-       * Helper method to verify whether the selected environment during the configuration phase is valid
-       * @param name
-       * @returns {boolean}
-       */
-      var isValidEnvironment = function (name) {
-        return !!ENVIRONMENTS[name];
-      };
 
       return {
         /**
@@ -51,14 +33,6 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
          * @returns {{name: string, port: string, tokenService: string}}
          */
         getEnvironment: function () {
-          // if (!environment) {
-          //   environment = {
-          //     name: defaultEnvironmentName,
-          //     port: ENVIRONMENTS[defaultEnvironmentName].port,
-          //     tokenService: ENVIRONMENTS[defaultEnvironmentName].tokenservice
-          //   };
-          // }
-          // return environment;
           return environmentsProvider.getCurrentEnvironment();
         },
 
