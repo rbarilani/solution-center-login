@@ -30,10 +30,19 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
         /**
          * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
          * @param name {string} Possible values: 'PRODUCTION', 'STAGE', 'INTEGRATION', 'DEVELOPMENT' (only for Norris team), 'LOCAL', 'TESTING'
+         * @param port Only used for development environments (LOCAL) if using a port different than the default one (3333)
+         * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
          * @returns Configured or fallback (LOCAL) environment
          */
-        configEnvironment: function (name) {
-          return environmentsProvider.setCurrentEnvironment(name);
+        configEnvironment: function (name, port, tokenService) {
+          var current = environmentsProvider.getCurrentEnvironment(name);
+          var env = environmentsProvider.formatEnvironment(current);
+
+          // override port/token service if necessary
+          env.ENVIRONMENT.PORT = port || env.ENVIRONMENT.PORT;
+          env.ENVIRONMENT.TOKEN_SERVICE.BASE_URL = tokenService || env.ENVIRONMENT.TOKEN_SERVICE.BASE_URL;
+
+          return environmentsProvider.setCurrentEnvironment(env);
         },
 
         /**
