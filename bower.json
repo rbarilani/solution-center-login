@@ -32,7 +32,7 @@
     "angular-cookies": "~1.5.0",
     "ngstorage": "^0.3.10",
     "angular-jwt": "^0.0.9",
-    "solution-center-communicator": "^0.1.0"
+    "solution-center-communicator": "git://github.com/zalando-incubator/solution-center-communicator.git#v1"
   },
   "devDependencies": {
     "angular-mocks": "~1.5.0"
