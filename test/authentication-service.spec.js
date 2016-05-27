@@ -515,5 +515,51 @@ describe('authenticationService', function () {
       });
     });
   });
+
+  /**
+   * CONFIG ENVIRONMENT
+   */
+  describe('config environment', function () {
+    var config;
+    var port;
+    var ts;
+
+    beforeEach(function () {
+      module('sc-authentication', function ($provide, authenticationServiceProvider) {
+        config = authenticationServiceProvider.configEnvironment;
+      });
+
+      inject(function ($injector) {
+        $injector.get('authenticationService');
+      });
+    });
+
+    it('should override PORT if custom port is passed', function () {
+      // confirm defaults
+      port = config('PRODUCTION').PORT;
+      expect(port).toBe('');
+      port = config('LOCAL').PORT;
+      expect(port).toBe(3333);
+
+      // overrides
+      port = config('PRODUCTION', 4444).PORT;
+      expect(port).toBe(4444);
+      port = config('LOCAL', 5555).PORT;
+      expect(port).toBe(5555);
+    });
+
+    it('should override token service url if custom token service is passed', function () {
+      var newTokenService = 'http://zalando.de';
+
+      // confirm defaults
+      ts = config('PRODUCTION').TOKEN_SERVICE.BASE_URL;
+      expect(ts).not.toBe(newTokenService);
+
+      // overrides
+      ts = config('PRODUCTION', 4444, newTokenService).TOKEN_SERVICE.BASE_URL;
+      expect(ts).toBe(newTokenService);
+    });
+  });
+
 });
 
