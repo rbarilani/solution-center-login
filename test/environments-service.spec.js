@@ -19,15 +19,9 @@ describe('environmentsService', function () {
       URL: 'https://solutions.zalando.com',
       DOMAIN: 'solutions.zalando.com',
       PORT: 'MOCKED_PORT',
-      USER_SERVICE: {
-        BASE_URL: 'https://user-management.norris.zalan.do'
-      },
-      TOKEN_SERVICE: {
-        BASE_URL: 'https://token-management.norris.zalan.do'
-      },
-      MERCHANT_SERVICE: {
-        BASE_URL: 'https://merchant-management.norris.zalan.do'
-      }
+      USER_SERVICE: 'https://user-management.norris.zalan.do',
+      TOKEN_SERVICE: 'https://token-management.norris.zalan.do',
+      MERCHANT_SERVICE: 'https://merchant-management.norris.zalan.do'
     };
   });
 

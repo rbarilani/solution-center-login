@@ -23,7 +23,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
 
           // override port/token service if necessary
           env.ENVIRONMENT.PORT = port || env.ENVIRONMENT.PORT;
-          env.ENVIRONMENT.TOKEN_SERVICE.BASE_URL = tokenService || env.ENVIRONMENT.TOKEN_SERVICE.BASE_URL;
+          env.ENVIRONMENT.TOKEN_SERVICE = tokenService || env.ENVIRONMENT.TOKEN_SERVICE;
 
           return environmentsProvider.setCurrentEnvironment(env);
         },
