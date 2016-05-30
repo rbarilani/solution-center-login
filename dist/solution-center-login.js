@@ -30,7 +30,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
 
           // override port/token service if necessary
           env.ENVIRONMENT.PORT = port || env.ENVIRONMENT.PORT;
-          env.ENVIRONMENT.TOKEN_SERVICE.BASE_URL = tokenService || env.ENVIRONMENT.TOKEN_SERVICE.BASE_URL;
+          env.ENVIRONMENT.TOKEN_SERVICE = tokenService || env.ENVIRONMENT.TOKEN_SERVICE;
 
           return environmentsProvider.setCurrentEnvironment(env);
         },
@@ -455,7 +455,7 @@ angular.module('sc-authentication')
       }
 
       function getTokensAPI(environment) {
-        return environment.TOKEN_SERVICE.BASE_URL + '/tokens';
+        return environment.TOKEN_SERVICE + '/tokens';
       }
 
       function getDomain(environment) {

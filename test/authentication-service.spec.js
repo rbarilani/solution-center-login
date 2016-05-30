@@ -552,11 +552,11 @@ describe('authenticationService', function () {
       var newTokenService = 'http://zalando.de';
 
       // confirm defaults
-      ts = config('PRODUCTION').TOKEN_SERVICE.BASE_URL;
+      ts = config('PRODUCTION').TOKEN_SERVICE;
       expect(ts).not.toBe(newTokenService);
 
       // overrides
-      ts = config('PRODUCTION', 4444, newTokenService).TOKEN_SERVICE.BASE_URL;
+      ts = config('PRODUCTION', 4444, newTokenService).TOKEN_SERVICE;
       expect(ts).toBe(newTokenService);
     });
   });

@@ -18,7 +18,7 @@ angular.module('sc-authentication')
       }
 
       function getTokensAPI(environment) {
-        return environment.TOKEN_SERVICE.BASE_URL + '/tokens';
+        return environment.TOKEN_SERVICE + '/tokens';
       }
 
       function getDomain(environment) {
