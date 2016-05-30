@@ -20,16 +20,18 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
         /**
          * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
          * @param name {string} Possible values: 'PRODUCTION', 'STAGE', 'INTEGRATION', 'DEVELOPMENT' (only for Norris team), 'LOCAL', 'TESTING'
-         * @param port Only used for development environments (LOCAL) if using a port different than the default one (3333)
-         * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
+         * @param port {number|string} Only used for development environments (LOCAL) if using a port different than the default one (3333)
+         * @param tokenService {string} Only used for development environments (LOCAL) to allow mocking it in case it is necessary
+         * @param domain {string} Only used for development environments (LOCAL) to allow overriding the domain
          * @returns Configured environment
          */
-        configEnvironment: function (name, port, tokenService) {
+        configEnvironment: function (name, port, tokenService, domain) {
           var env = scEnvironmentsProvider.getSpecificEnvironment(name);
 
           // override port/token service if necessary
           env.PORT = port || env.PORT;
           env.TOKEN_SERVICE = tokenService || env.TOKEN_SERVICE;
+          env.DOMAIN = domain || env.DOMAIN;
 
           return scEnvironmentsProvider.setCurrentEnvironment(env);
         },
@@ -93,7 +95,8 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     getBrand: getBrand,
     setBrand: setBrand,
     clearCredentials: clearCredentials,
-    clearBrand: clearBrand
+    clearBrand: clearBrand,
+    validateToken: validateToken
   };
 
   return service;
@@ -338,8 +341,13 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
       return $q.reject("The current browser's user agent doesn't match the one stored in the token");
     }
 
+
     return $injector.get('$http')
-        .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
+      .get(environmentsService.getTokensAPI(self.getEnvironment()), {
+          headers: {
+              Authorization: token
+          }
+      });
   }
 
   /**

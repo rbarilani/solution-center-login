@@ -305,6 +305,26 @@ describe('authenticationService', function () {
     });
 
     /**
+     * validateToken
+     */
+    describe('validateToken', function () {
+      it('should call the right end point with the correct authorization header set', function () {
+        var payload = window.btoa(JSON.stringify({"emp":true,"agent":"browser","exp":1465217467,"uid": 1000007,"iat":1464612667}));
+        var token = 'foo-header.' + payload + '.bar-signature';
+
+        $httpBackend
+          .expect('GET', mockedTokensAPIEndpoint, null, function (headers) {
+            expect(headers.Authorization).toBe(token);
+            return headers.Authorization ===  token;
+          })
+          .respond(200);
+
+        authenticationService.validateToken(token);
+        $httpBackend.flush();
+      });
+    });
+
+    /**
      * logout
      */
 

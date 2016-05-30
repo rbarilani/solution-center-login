@@ -88,7 +88,8 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
     getBrand: getBrand,
     setBrand: setBrand,
     clearCredentials: clearCredentials,
-    clearBrand: clearBrand
+    clearBrand: clearBrand,
+    validateToken: validateToken
   };
 
   return service;
@@ -333,8 +334,13 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
       return $q.reject("The current browser's user agent doesn't match the one stored in the token");
     }
 
+
     return $injector.get('$http')
-        .get(environmentsService.getTokensAPI(self.getEnvironment()), token);
+      .get(environmentsService.getTokensAPI(self.getEnvironment()), {
+          headers: {
+              Authorization: token
+          }
+      });
   }
 
   /**
