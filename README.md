@@ -3,65 +3,43 @@ Login service to handle authentication in the Zalando Solution Center
 
 ### Installation
 
-Install via bower
+Install via bower or npm
 
 ```shell
 bower install solution-center-login
-```
-
-Install via npm
-
-```shell
 npm install solution-center-login
 ```
 
 ### Usage
 
-1. Load the script in your `<head>` from Bower:
+1. Load the script in your `<head>` from Bower or NPM:
 
     ```html
     <script src="../bower_components/solution-center-login/dist/solution-center-login.js"></script>
-    ```
-    
-    Or from NPM:
-    
-    
-    ```html
     <script src="../node_modules/solution-center-login/dist/solution-center-login.js"></script>
     ```
+    For Bower, if you are using [wiredep](https://github.com/taptapship/wiredep), it will be loaded automatically.
 
-2. Inject the **authenticationServiceProvider** in the config method of your app and add the module dependency of **sc-authentication**:
+2. Add **sc-authentication** as a module dependency.
 
     ```javascript
-    angular.module('my-module', ['sc-authentication']).
-      .config(['authenticationServiceProvider', function(authenticationServiceProvider) {
+    angular.module('my-module', ['sc-authentication'])
     ```
 
-3. Configure the required environment ('PRODUCTION', 'INTEGRATION', 'STAGE', 'DEVELOPMENT' or 'LOCAL') for correct redirection handling:
+3. Configure the application by injecting **authenicationServiceProvider** in your config block and setting the environment.
 
     ```javascript
-    authenticationServiceProvider.configEnvironment('STAGE');
+    .config(['authenticationServiceProvider', function(authenticationServiceProvider) {
+        authenticationServiceProvider.configEnvironment('STAGE');
+    }
     ```
-    
-    The default value is 'LOCAL' and you can also optionally set:
-    - A port in case you run your application in this environment using a different port than the default one (3333)
-    - An endpoint for the Token Service in case you want to mock it instead of using the default one ('https://tm-development.norris.zalan.do')
+    Environment options:
+    * 'LOCAL' (see [Running locally](#running-locally))
+    * 'INTEGRATION'
+    * 'STAGE'
+    * 'PRODUCTION'
 
-    ```javascript
-    authenticationServiceProvider.configEnvironment('LOCAL', 3001, 'mockedTokenService');
-    ```    
-    
-4. Due to limitations of redirecting using the $window service, whenever any app which performs the actual authentication through the User Service and redirects back to the Authentication app after completing it (typically the Solution Center app), is hosted in the same subdomain as the Authentication app, a different redirection mechanism using the $location service has to be used, which can be enabled through the following method: 
-
-    ```javascript
-    authenticationServiceProvider.setInternalCommunication(true);
-    ```    
-    
-    In most of the cases you can simply ignore this flag since the mechanism is *disabled by default* which is the most common situation. However, it becomes necessary when configured in any of the two following situations:
-    - Solution Center app (since the Authentication app will always be hosted in its same domain)
-    - In local development, when mocking the Solution Center mechanism to authenticate via the User Service, in order to bypass it and avoid the need of having the Solution Center app running locally
-    
-5. Protect a certain view, requiring the existence of an authenticated user to access it by calling the specific method for it inside the resolve method of your routing provider (ngRoute, UI-router):
+4. Protect a certain view (or your entire application) by attaching a resolve to the route (works with [ngRoute](https://docs.angularjs.org/api/ngRoute/provider/$routeProvider) and [UI Router](https://github.com/angular-ui/ui-router).
 
     ```javascript
     resolve: {
@@ -69,7 +47,42 @@ npm install solution-center-login
             return authenticationService.requireAuthenticatedUser();
         }
     }
-    ```    
+```    
+
+### Running locally
+
+When running locally, you need to connect this service to a real (or mocked) login page to handle authentication. You have two options:
+
+#### Run Solution Center locally alongside your application
+1. Pull the latest version of the [Solution Center](https://github.bus.zalan.do/norris/solution-center).
+2. Follow instructions for [installing and running locally](https://github.bus.zalan.do/norris/solution-center#local-installation). Note the <PORT> it is running on.
+3. Configure this application to use your local copy for login.
+
+    ```javascript
+    authenticationServiceProvider.setInternalCommunication(true);
+    authenticationServiceProvider.configEnvironment('LOCAL', <PORT>);
+    ```
+4. (Optional) Override the token service URL to point to a different Solution Center environment (default is DEVELOPMENT).
+
+    ```javascript
+    authenticationServiceProvider.configEnvironment('LOCAL', <PORT>, 'tm-integration.norris.zalan.do');
+    ```
+
+#### Mock the Solution Center locally
+1. Use any login page you like, as long as it is served locally at `/login`.
+2. Call `authenticationService.silentLogin(email, password)` from the mocked login.
+3. Configure this application to use your local login mock.
+
+    ```javascript
+    authenticationServiceProvider.setInternalCommunication(true);
+    authenticationServiceProvider.configEnvironment('LOCAL', <PORT>);
+    ```
+4. (Optional) Override the token service URL to point to a mocked token endpoint.
+
+    ```javascript
+    authenticationServiceProvider.configEnvironment('LOCAL', <PORT>, 'your.mocked.token.endpoint');
+    ```
+Note: to work correctly with this library, your mocked token endpoint should conform to our [token API spec](https://token-management.norris.zalan.do/api/index.html#/Token).
 
 ### Develop
 
@@ -89,12 +102,7 @@ npm install -g gulp
 #### Available commands
 
 * `gulp build`: build the project and make new files in `dist`
-* `gulp serve`: start a server to serve the demo page and launch a browser then watches for changes in `src` files to reload the page
 * `gulp test`: run unit tests
-
-3. At this point, for local development you have two options:
-    - either running the Solution Center app locally (see instructions for it in its README file)
-    - or simulating the behaviour of the Solution Center app inside your own one, intercepting the login route and mocking its actual authentication through the User Service, bypassing the Solution Center app
 
 ### License
 MIT
