@@ -1,9 +1,9 @@
-angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 'solution.center.communicator'])
+angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 'solutioncenter.communicator'])
     .config(['$localStorageProvider',
       function ($localStorageProvider) {
         $localStorageProvider.setKeyPrefix('solutionCenter-');
       }])
-    .provider('authenticationService', ['environmentsProvider', function (environmentsProvider) {
+    .provider('authenticationService', ['scEnvironmentsProvider', function (scEnvironmentsProvider) {
       'use strict';
 
       var internalCommunication = false;
@@ -35,14 +35,13 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
          * @returns Configured or fallback (LOCAL) environment
          */
         configEnvironment: function (name, port, tokenService) {
-          var current = environmentsProvider.getCurrentEnvironment(name);
-          var env = environmentsProvider.formatEnvironment(current);
+          var env = scEnvironmentsProvider.getSpecificEnvironment(name);
 
           // override port/token service if necessary
-          env.ENVIRONMENT.PORT = port || env.ENVIRONMENT.PORT;
-          env.ENVIRONMENT.TOKEN_SERVICE = tokenService || env.ENVIRONMENT.TOKEN_SERVICE;
+          env.PORT = port || env.PORT;
+          env.TOKEN_SERVICE = tokenService || env.TOKEN_SERVICE;
 
-          return environmentsProvider.setCurrentEnvironment(env);
+          return scEnvironmentsProvider.setCurrentEnvironment(env);
         },
 
         /**
@@ -50,7 +49,7 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
          * @returns Configured or fallback (LOCAL) environment
          */
         getEnvironment: function () {
-          return environmentsProvider.getCurrentEnvironment();
+          return scEnvironmentsProvider.getCurrentEnvironment();
         },
 
         /**

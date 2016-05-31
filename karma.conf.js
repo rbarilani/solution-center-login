@@ -17,7 +17,7 @@ module.exports = function(config) {
       'bower_components/angular-jwt/dist/angular-jwt.js',
       'bower_components/ngstorage/ngStorage.js',
       'bower_components/angular-cookies/angular-cookies.js',
-      'bower_components/solution-center-communicator/dist/solution-center-communicator.js',
+      'bower_components/solution-center-communicator/dist/solutioncenter.communicator.js',
 
       'src/**/*.js',
       'test/**/*.spec.js'
