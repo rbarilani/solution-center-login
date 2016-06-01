@@ -2,7 +2,7 @@ describe('authenticationService', function () {
   'use strict';
 
   var $rootScope, authenticationService, $q, $localStorage, $cookies, environmentsService, $location,
-      $httpBackend, jwtHelper, $window, $timeout;
+    $httpBackend, jwtHelper, $window, $timeout;
 
   var mockedToken = 'JWT_TOKEN';
   var mockedUserAgent = 'browser';
@@ -15,8 +15,6 @@ describe('authenticationService', function () {
   var mockedLoginPath = '/LOGIN';
   var mockedBrandId = 1;
   var anyString = 'ANY_STRING';
-  var mockedFunction = function () {
-  };
   var mockedLocalstorage = {};
   var mockedCookieService = jasmine.createSpyObj('mockedCookieService', ['get', 'put', 'remove']);
   var BRAND_COOKIE_KEY = 'SC_BRAND';
@@ -28,10 +26,12 @@ describe('authenticationService', function () {
   var failure = function () {
     resolved = false;
   };
-
-  beforeEach(function () {
-    module('sc-authentication', 'angular-jwt', 'ngStorage', 'ngCookies');
-  });
+  var now = new Date();
+  var cookieConfig = {
+    domain: 'localhost',
+    secure: false,
+    expires: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7)
+  };
 
   /**
    * GENERAL BEHAVIOUR WHEN COMMUNICATING WITH ANY APP DIFFERENT THAN THE SOLUTION CENTER
@@ -40,32 +40,8 @@ describe('authenticationService', function () {
 
   describe('general behaviour', function () {
     beforeEach(function () {
-      module('sc-authentication', function ($provide, authenticationServiceProvider) {
-        $provide.value('$window', {location: {href: mockedOriginUrl}, navigator: {userAgent: mockedUserAgent}});
-        $provide.value('$localStorage', mockedLocalstorage);
-        $provide.value('$cookies', mockedCookieService);
-        authenticationServiceProvider.setInternalCommunication(false);
-        authenticationServiceProvider.configEnvironment('LOCAL');
-      });
-
-      inject(
-          function (_$rootScope_, _authenticationService_, _$q_, _$localStorage_, _$cookies_, _environmentsService_,
-                    _$httpBackend_, _jwtHelper_, _$window_) {
-            $rootScope = _$rootScope_;
-            authenticationService = _authenticationService_;
-            $q = _$q_;
-            $localStorage = _$localStorage_;
-            $cookies = _$cookies_;
-            environmentsService = _environmentsService_;
-            $httpBackend = _$httpBackend_;
-            jwtHelper = _jwtHelper_;
-            $window = _$window_;
-
-            spyOn(environmentsService, 'getDomain').and.returnValue(mockedDomain);
-            spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
-            spyOn(jwtHelper, 'decodeToken').and.returnValue(mockedTokenPayload);
-            spyOn(authenticationService, 'setToken').and.callThrough();
-          });
+      modules();
+      injectors();
     });
 
     afterEach(function () {
@@ -99,7 +75,7 @@ describe('authenticationService', function () {
 
     describe('requireAuthenticatedUser', function () {
       it('tries to authenticate the user', function () {
-        spyOn(authenticationService, 'authenticate').and.callFake(mockedFunction);
+        spyOn(authenticationService, 'authenticate');
 
         authenticationService.requireAuthenticatedUser();
 
@@ -119,9 +95,9 @@ describe('authenticationService', function () {
         spyOn(environmentsService, 'getSolutionCenterUrl').and.returnValue($window.location.host);
 
         authenticationService.redirectToHomeIfAuthenticated()
-            .catch(function () {
-              rejected = true;
-            });
+          .catch(function () {
+            rejected = true;
+          });
         $rootScope.$digest();
 
         expect($window.location.href).not.toEqual(mockedOriginUrl);
@@ -134,9 +110,9 @@ describe('authenticationService', function () {
         spyOn(authenticationService, 'isAuthenticated').and.returnValue(false);
 
         authenticationService.redirectToHomeIfAuthenticated()
-            .then(function () {
-              resolved = true;
-            });
+          .then(function () {
+            resolved = true;
+          });
         $rootScope.$digest();
 
         expect(resolved).toBeTruthy();
@@ -162,7 +138,7 @@ describe('authenticationService', function () {
         expect($localStorage.user.id).toBe(mockedUser.id);
         expect($localStorage.user.firstName).toBe(mockedUser.firstName);
         expect($localStorage.user.lastName).toBe(mockedUser.lastName);
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
+        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, cookieConfig);
       });
 
       it('updates the credentials if there is a token which is still valid but has to be reissued (API returning HTTP 409)', function () {
@@ -179,7 +155,7 @@ describe('authenticationService', function () {
         expect($localStorage.user.id).toBe(mockedUser.id);
         expect($localStorage.user.firstName).toBe(mockedUser.firstName);
         expect($localStorage.user.lastName).toBe(mockedUser.lastName);
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, newToken, {domain: 'domain'});
+        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, newToken, cookieConfig);
       });
 
       it('redirects to login if there is a token but it is not valid (API returning HTTP 401)', function () {
@@ -286,7 +262,7 @@ describe('authenticationService', function () {
         $rootScope.$digest();
 
         expect(authenticationService.login).toHaveBeenCalledWith(anyString, anyString);
-        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, {domain: 'domain'});
+        expect(mockedCookieService.put).toHaveBeenCalledWith(TOKEN_COOKIE_KEY, mockedToken, cookieConfig);
       });
 
       it('does not store any credential when the login is not possible', function () {
@@ -464,7 +440,7 @@ describe('authenticationService', function () {
       it('sets a brand in the cookie', function () {
         authenticationService.setBrand(mockedBrandId);
 
-        expect(mockedCookieService.put).toHaveBeenCalledWith(BRAND_COOKIE_KEY, mockedBrandId, {domain: 'domain'});
+        expect(mockedCookieService.put).toHaveBeenCalledWith(BRAND_COOKIE_KEY, mockedBrandId, cookieConfig);
       });
     });
   });
@@ -476,24 +452,8 @@ describe('authenticationService', function () {
 
   describe('when communicating with the Solution Center app', function () {
     beforeEach(function () {
-      module('sc-authentication', function ($provide, authenticationServiceProvider) {
-        authenticationServiceProvider.setInternalCommunication(true);
-        // Skip the configuration of the environment to test that it falls back to the default values as expected
-      });
-
-      inject(
-          function (_$rootScope_, _authenticationService_, _environmentsService_, _$location_, _$httpBackend_, _$timeout_) {
-            $rootScope = _$rootScope_;
-            authenticationService = _authenticationService_;
-            environmentsService = _environmentsService_;
-            $location = _$location_;
-            $httpBackend = _$httpBackend_;
-            $timeout = _$timeout_;
-
-            spyOn(environmentsService, 'getDomain').and.returnValue(mockedDomain);
-            spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
-            spyOn($location, 'url');
-          });
+      modules(true);
+      injectors();
     });
 
     /**
@@ -528,10 +488,7 @@ describe('authenticationService', function () {
       module('sc-authentication', function ($provide, authenticationServiceProvider) {
         config = authenticationServiceProvider.configEnvironment;
       });
-
-      inject(function ($injector) {
-        $injector.get('authenticationService');
-      });
+      injectors();
     });
 
     it('should override PORT if custom port is passed', function () {
@@ -560,6 +517,43 @@ describe('authenticationService', function () {
       expect(ts).toBe(newTokenService);
     });
   });
+
+  ////////////////////////
+
+  function modules(internal) {
+    module('sc-authentication', 'angular-jwt', 'ngStorage', 'ngCookies',
+      function ($provide, authenticationServiceProvider) {
+        $provide.value('$window', {location: {href: mockedOriginUrl}, navigator: {userAgent: mockedUserAgent}});
+        $provide.value('$localStorage', mockedLocalstorage);
+        $provide.value('$cookies', mockedCookieService);
+        authenticationServiceProvider.setInternalCommunication(internal);
+        authenticationServiceProvider.configEnvironment('LOCAL');
+      });
+  }
+
+  function injectors() {
+    inject(
+      function (_$rootScope_, _authenticationService_, _$q_, _$localStorage_, _$cookies_, _environmentsService_,
+                _$httpBackend_, _jwtHelper_, _$window_, _$location_, _$timeout_) {
+        $rootScope = _$rootScope_;
+        authenticationService = _authenticationService_;
+        $q = _$q_;
+        $localStorage = _$localStorage_;
+        $cookies = _$cookies_;
+        environmentsService = _environmentsService_;
+        $httpBackend = _$httpBackend_;
+        jwtHelper = _jwtHelper_;
+        $window = _$window_;
+        $location = _$location_;
+        $timeout = _$timeout_;
+
+        spyOn(environmentsService, 'getDomain').and.returnValue(mockedDomain);
+        spyOn(environmentsService, 'getTokensAPI').and.returnValue(mockedTokensAPIEndpoint);
+        spyOn(jwtHelper, 'decodeToken').and.returnValue(mockedTokenPayload);
+        spyOn(authenticationService, 'setToken').and.callThrough();
+        spyOn($location, 'url');
+      });
+  }
 
 });
 
