@@ -13,7 +13,3 @@ approvals:
       - norris
     # OR a collaborator of the repo
     collaborators: true
-
-autobranch:
-  pattern: {number}-{title}
-  length: 60
