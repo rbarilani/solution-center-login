@@ -16,7 +16,7 @@
 <a name="1.0.0"></a>
 # [1.0.0](https://github.com/zalando-incubator/solution-center-login/compare/0.5.0...1.0.0) (2016-06-06)
 
-
+* Solution Center launch
 
 <a name="0.5.0"></a>
 # [0.5.0](https://github.com/zalando-incubator/solution-center-login/compare/0.4.0...0.5.0) (2016-05-26)
