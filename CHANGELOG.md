@@ -1,3 +1,18 @@
+<a name="1.1.0"></a>
+# [1.1.0](https://github.com/zalando-incubator/solution-center-login/compare/1.0.0...v1.1.0) (2016-06-06)
+
+
+### Bug Fixes
+
+* **cookies:** set cookie options on all put and remove calls, fixes [#28](https://github.com/zalando-incubator/solution-center-login/issues/28) ([645a1cb](https://github.com/zalando-incubator/solution-center-login/commit/645a1cb)), closes [#28](https://github.com/zalando-incubator/solution-center-login/issues/28)
+
+
+### Features
+
+* **communicator:** integrate solution-center-communicator ([f5da378](https://github.com/zalando-incubator/solution-center-login/commit/f5da378))
+
+
+
 <a name="1.0.0"></a>
 # [1.0.0](https://github.com/zalando-incubator/solution-center-login/compare/0.5.0...1.0.0) (2016-06-06)
 
