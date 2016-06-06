@@ -57,12 +57,11 @@ angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 's
         /**
          * Factory implementation
          */
-        $get: [
-          '$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location', '$timeout',
-          authenticationFactory
-        ]
+        $get: authenticationFactory
       };
     }]);
+
+authenticationFactory.$inject = ['$q', '$localStorage', '$cookies', 'environmentsService', '$window', '$injector', 'jwtHelper', '$location', '$timeout'];
 
 function authenticationFactory($q, $localStorage, $cookies, environmentsService, $window, $injector, jwtHelper, $location, $timeout) {
   'use strict';
@@ -214,7 +213,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @param token
    */
   function setToken(token) {
-    $cookies.put(TOKEN_COOKIE_KEY, token, {'domain': environmentsService.getDomain(self.getEnvironment())});
+    $cookies.put(TOKEN_COOKIE_KEY, token, getCookieConfig());
   }
 
   /**
@@ -246,7 +245,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * @param brandId
    */
   function setBrand(brandId) {
-    $cookies.put(BRAND_COOKIE_KEY, brandId, {'domain': environmentsService.getDomain(self.getEnvironment())});
+    $cookies.put(BRAND_COOKIE_KEY, brandId, getCookieConfig());
   }
 
   /**
@@ -262,7 +261,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * Removes the brand from the cookie
    */
   function clearBrand() {
-    $cookies.remove(BRAND_COOKIE_KEY);
+    $cookies.remove(BRAND_COOKIE_KEY, getCookieConfig());
   }
 
   /*
@@ -358,7 +357,7 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    * Removes the token from local storage and the cookie
    */
   function clearToken() {
-    $cookies.remove(TOKEN_COOKIE_KEY);
+    $cookies.remove(TOKEN_COOKIE_KEY, getCookieConfig());
   }
 
   /**
@@ -424,5 +423,19 @@ function authenticationFactory($q, $localStorage, $cookies, environmentsService,
    */
   function getUserAgent() {
     return $window.navigator.userAgent;
+  }
+
+  /**
+   * Returns an object with our cookie settings, to be passed to calls to $cookies.put and $cookies.remove.
+   * @returns {{domain: string, secure: boolean, expires: Date}}
+   */
+  function getCookieConfig() {
+    var env = self.getEnvironment();
+    var now = new Date();
+    return {
+      domain: env.DOMAIN,
+      secure: env.NAME !== 'LOCAL',
+      expires: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7)
+    };
   }
 }
