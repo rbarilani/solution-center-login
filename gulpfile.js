@@ -12,6 +12,7 @@ var flatten = require("gulp-flatten");
 var eslint = require('gulp-eslint');
 var gutil = require('gulp-util');
 var gulpif = require('gulp-if');
+var conventionalChangelog = require('gulp-conventional-changelog');
 
 var config = {
     pkg : JSON.parse(fs.readFileSync('./package.json')),
@@ -55,6 +56,16 @@ gulp.task('scripts', function() {
         .pipe(rename({suffix: '.min'}))
         .pipe(uglify({preserveComments: 'some'}))
         .pipe(gulp.dest('./dist'))
+});
+
+gulp.task('changelog', function() {
+  return gulp.src('CHANGELOG.md', {
+        buffer: true
+      })
+      .pipe(conventionalChangelog({
+        preset: 'angular'
+      }))
+      .pipe(gulp.dest('./'));
 });
 
 gulp.task('lint-test', function(){

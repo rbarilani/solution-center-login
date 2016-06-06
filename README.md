@@ -1,6 +1,8 @@
 # Solution Center Login
 Login service to handle authentication in the Zalando Solution Center
 
+[Changelog](CHANGELOG.md)
+
 ### Installation
 
 Install via bower or npm
