@@ -1,56 +1,38 @@
-angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt'])
+angular.module('sc-authentication', ['ngStorage', 'ngCookies', 'angular-jwt', 'solutioncenter.communicator'])
     .config(['$localStorageProvider',
       function ($localStorageProvider) {
         $localStorageProvider.setKeyPrefix('solutionCenter-');
       }])
-    .provider('authenticationService', ['ENVIRONMENTS', function (ENVIRONMENTS) {
+    .provider('authenticationService', ['scEnvironmentsProvider', function (scEnvironmentsProvider) {
       'use strict';
-
-      var environment;
-      var defaultEnvironmentName = 'LOCAL';
 
       var internalCommunication = false;
 
-      /**
-       * Helper method to verify whether the selected environment during the configuration phase is valid
-       * @param name
-       * @returns {boolean}
-       */
-      var isValidEnvironment = function (name) {
-        return !!ENVIRONMENTS[name];
-      };
-
       return {
+
         /**
          * Configures the environment for appropriate handling or redirections between the different apps within the Solution Center
-         * @param name Possible values: 'PRODUCTION', 'INTEGRATION', 'STAGE', 'DEVELOPMENT' (only for Norris team) and 'LOCAL'
+         * @param name {string} Possible values: 'PRODUCTION', 'STAGE', 'INTEGRATION', 'DEVELOPMENT' (only for Norris team), 'LOCAL', 'TESTING'
          * @param port Only used for development environments (LOCAL) if using a port different than the default one (3333)
          * @param tokenService Only used for development environments (LOCAL) to allow mocking it in case it is necessary
+         * @returns Configured environment
          */
         configEnvironment: function (name, port, tokenService) {
-          environment = {};
-          environment.name = isValidEnvironment(name) ? name : defaultEnvironmentName;
+          var env = scEnvironmentsProvider.getSpecificEnvironment(name);
 
-          if (environment.name === defaultEnvironmentName) {
-            environment.port = port || ENVIRONMENTS[defaultEnvironmentName].port;
-            environment.tokenService = tokenService || ENVIRONMENTS[defaultEnvironmentName].tokenservice;
-          }
+          // override port/token service if necessary
+          env.PORT = port || env.PORT;
+          env.TOKEN_SERVICE = tokenService || env.TOKEN_SERVICE;
+
+          return scEnvironmentsProvider.setCurrentEnvironment(env);
         },
 
         /**
          * Returns the configured environment of the app
-         * If it was not configured before it sets it to the default environment values (LOCAL)
-         * @returns {{name: string, port: string, tokenService: string}}
+         * @returns Configured environment
          */
         getEnvironment: function () {
-          if (!environment) {
-            environment = {
-              name: defaultEnvironmentName,
-              port: ENVIRONMENTS[defaultEnvironmentName].port,
-              tokenService: ENVIRONMENTS[defaultEnvironmentName].tokenservice
-            };
-          }
-          return environment;
+          return scEnvironmentsProvider.getCurrentEnvironment();
         },
 
         /**

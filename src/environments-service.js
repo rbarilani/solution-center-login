@@ -1,12 +1,12 @@
 angular.module('sc-authentication')
-  .factory('environmentsService', ['ENVIRONMENTS',
-    function (ENVIRONMENTS) {
+  .factory('environmentsService', [
+    function () {
+      
       function getSolutionCenterUrl(environment) {
-        var url = ENVIRONMENTS[environment.name].url;
-        if (environment.name === 'LOCAL') {
-          url = url.replace('{PORT}', environment.port);
-        }
-        return url;
+        var url = environment.URL;
+        var port = (environment.PORT && ':'.concat(environment.PORT)) || '';
+
+        return url.concat(port);
       }
 
       function getLoginPath() {
@@ -18,14 +18,11 @@ angular.module('sc-authentication')
       }
 
       function getTokensAPI(environment) {
-        if (environment.name === 'LOCAL') {
-          return environment.tokenService + '/tokens';
-        }
-        return ENVIRONMENTS[environment.name].tokenservice + '/tokens';
+        return environment.TOKEN_SERVICE + '/tokens';
       }
 
       function getDomain(environment) {
-        return ENVIRONMENTS[environment.name].domain;
+        return environment.DOMAIN;
       }
 
       return {
