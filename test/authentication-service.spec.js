@@ -483,6 +483,7 @@ describe('authenticationService', function () {
     var config;
     var port;
     var ts;
+    var domain;
 
     beforeEach(function () {
       module('sc-authentication', function ($provide, authenticationServiceProvider) {
@@ -515,6 +516,18 @@ describe('authenticationService', function () {
       // overrides
       ts = config('PRODUCTION', 4444, newTokenService).TOKEN_SERVICE;
       expect(ts).toBe(newTokenService);
+    });
+
+    it('should override domain if custom domain is passed', function () {
+      var newDomain = 'my.custom.domain';
+
+      // confirm defaults
+      domain = config('STAGE').DOMAIN;
+      expect(domain).not.toBe(newDomain);
+
+      // overrides
+      domain = config('STAGE', 4444, '', newDomain).DOMAIN;
+      expect(domain).toBe(newDomain);
     });
   });
 
